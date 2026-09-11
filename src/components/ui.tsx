@@ -93,8 +93,8 @@ export function NumInput({
   onChange,
   placeholder,
   disabled,
-  kind = "plain",
-  hint = false,
+  kind = "inr",
+  hint = true,
 }: {
   value: number | string | null | undefined;
   onChange: (v: string) => void;
@@ -103,7 +103,7 @@ export function NumInput({
   kind?: "inr" | "count" | "plain";
   hint?: boolean;
 }) {
-  const grouped = kind === "inr" || kind === "count";
+  const grouped = kind !== "plain";
   const shown = grouped ? formatInrDisplay(value) : value === null || value === undefined ? "" : String(value);
   const scale = grouped ? inrInputHint(value) : "";
 
@@ -112,7 +112,7 @@ export function NumInput({
     const raw = el.value;
     const caret = el.selectionStart ?? raw.length;
     const digitsBefore = raw.slice(0, caret).replace(/\D/g, "").length;
-    const next = grouped ? formatInrTyping(raw) : raw.replace(/[^\d.]/g, "");
+    const next = grouped ? formatInrTyping(raw, kind === "inr") : raw.replace(/[^\d.]/g, "");
     onChange(next);
     requestAnimationFrame(() => {
       let seen = 0;

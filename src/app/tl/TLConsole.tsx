@@ -26,7 +26,6 @@ import {
   fmtCr,
   fmtInt,
   fmtLakh,
-  formatInrTyping,
   initials,
   monthMeta,
   num,
@@ -682,15 +681,15 @@ export default function TLConsole({
                     <div className="mb-1.5 text-xs" style={{ color: C.slate }}>
                       Same target for everyone
                     </div>
-                    <div className="flex gap-2">
-                      <input
-                        value={flatTarget}
-                        onChange={(e) => setFlatTarget(formatInrTyping(e.target.value))}
-                        placeholder="6,00,000 or 6L"
-                        inputMode="decimal"
-                        className="w-40 rounded px-2 py-1.5 text-sm tabular-nums outline-none"
-                        style={{ border: `1px solid ${C.line}`, background: C.panel, color: C.ink }}
-                      />
+                    <div className="flex items-end gap-2">
+                      <div className="w-48">
+                        <NumInput
+                          value={flatTarget === "" ? null : flatTarget}
+                          onChange={setFlatTarget}
+                          placeholder="6,00,000 or 6L"
+                          kind="inr"
+                        />
+                      </div>
                       <GhostButton onClick={applyFlatTarget} icon={Target}>
                         Apply to all
                       </GhostButton>
@@ -742,7 +741,7 @@ export default function TLConsole({
                                 <NumInput value={a?.target} onChange={(v) => saveAssignment(r.id, "target", v)} placeholder="—" kind="inr" />
                               </td>
                               <td className="px-3 py-1.5" style={{ width: 100 }}>
-                                <NumInput value={a?.quality_score} onChange={(v) => saveAssignment(r.id, "quality_score", v)} placeholder="—" />
+                                <NumInput value={a?.quality_score} onChange={(v) => saveAssignment(r.id, "quality_score", v)} placeholder="—" kind="count" />
                               </td>
                               {(["ape", "frp", "policies"] as const).map((f) => (
                                 <td key={f} className="px-3 py-1.5" style={{ width: 130 }}>

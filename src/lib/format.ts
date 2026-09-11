@@ -3,29 +3,33 @@ export function num(v: unknown): number {
   return Number.isFinite(n) ? n : 0;
 }
 
-export function parseLoose(raw: string | number | null | undefined): number | null {
+export function parseLoose(raw: string | number | null | undefined, units = true): number | null {
   if (raw === null || raw === undefined) return null;
   if (typeof raw === "number") return Number.isFinite(raw) ? raw : null;
   const cleaned = String(raw).trim().replace(/₹/g, "").replace(/,/g, "").replace(/\s+/g, "");
   if (cleaned === "" || cleaned === "-" || cleaned === ".") return null;
-  const m = cleaned.match(/^(-?\d*\.?\d+)(k|l|lac|lakh|cr|crore)?$/i);
+  const m = units
+    ? cleaned.match(/^(-?\d*\.?\d+)(k|l|lac|lakh|cr|crore)?$/i)
+    : cleaned.match(/^(-?\d*\.?\d+)$/);
   if (!m) return null;
   let n = Number(m[1]);
   if (!Number.isFinite(n)) return null;
-  const u = (m[2] || "").toLowerCase();
-  if (u === "k") n *= 1_000;
-  else if (u === "l" || u === "lac" || u === "lakh") n *= 100_000;
-  else if (u === "cr" || u === "crore") n *= 10_000_000;
+  if (units) {
+    const u = (m[2] || "").toLowerCase();
+    if (u === "k") n *= 1_000;
+    else if (u === "l" || u === "lac" || u === "lakh") n *= 100_000;
+    else if (u === "cr" || u === "crore") n *= 10_000_000;
+  }
   return n;
 }
 
 /** Indian grouping as digits are typed: 123 → 1,23,456 → 12,34,567. */
-export function formatInrTyping(raw: string): string {
-  const parsed = parseLoose(raw);
+export function formatInrTyping(raw: string, units = true): string {
+  const parsed = parseLoose(raw, units);
   if (parsed === null) {
     const digits = raw.replace(/[₹,\s]/g, "");
     if (digits === "" || digits === "-") return digits;
-    return raw;
+    return units ? raw : digits.replace(/[^\d.-]/g, "");
   }
   const fraction = !Number.isInteger(parsed);
   return new Intl.NumberFormat("en-IN", {

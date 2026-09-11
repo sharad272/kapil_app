@@ -336,7 +336,7 @@ export default function RMWorkspace({
                     {c.label}
                   </span>
                 </div>
-                <NumInput value={certs[c.key]} onChange={(v) => saveCert(c.key, v)} placeholder="—" />
+                <NumInput value={certs[c.key]} onChange={(v) => saveCert(c.key, v)} placeholder="—" kind="count" />
               </div>
             ))}
           </div>
