@@ -52,7 +52,7 @@ export async function Landing() {
               kicker="Kapil Sharma · production desk"
               sub="Monthly APE, FRP, quality and certifications — formally separated. The team lead sees the whole book. Relationship managers see only their own figures."
             />
-            <dl className="mt-10 grid grid-cols-3 gap-4 max-w-lg">
+            <dl className="mt-10 grid max-w-lg grid-cols-3 gap-2 sm:gap-4">
               {[
                 ["6", "RMs on the book"],
                 ["Sep’26", "Open month"],

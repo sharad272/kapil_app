@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 import { AssistantDesk, RiskBoard } from "@/components/assistant-desk";
 import { BrandHero } from "@/components/brand-hero";
-import { DemoSwitcher } from "@/components/demo-switcher";
 import { TeamDesk } from "@/components/team-desk";
 import { C, EmptyState, GhostButton, NumInput, PrimaryButton, StatTile, TableScroll, TopBar } from "@/components/ui";
 import { buildKpis, riskLabel } from "@/lib/kpis";
@@ -373,9 +372,7 @@ export default function TLConsole({
         onSignOut={signOut}
         sticky={false}
         right={
-          <>
-            {mode === "demo" ? <DemoSwitcher currentId={profile.id} /> : null}
-            {monthList.length > 0 && (
+          monthList.length > 0 ? (
               <select
                 value={activeMonth}
                 onChange={(e) => setActiveMonth(e.target.value)}
@@ -389,8 +386,7 @@ export default function TLConsole({
                   </option>
                 ))}
               </select>
-            )}
-          </>
+          ) : undefined
         }
       />
 

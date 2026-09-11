@@ -19,10 +19,10 @@ export function BrandHero({
         <p className="text-[11px] font-medium uppercase tracking-[0.32em]" style={{ color: C.gold }}>
           {kicker ?? "Dashboard"}
         </p>
-        <h1 className="serif mt-3 text-4xl font-semibold leading-[0.92] tracking-tight text-white sm:text-6xl">
+        <h1 className="serif mt-3 text-[2.15rem] font-semibold leading-[0.92] tracking-tight text-white sm:text-4xl lg:text-6xl">
           Team Victory
         </h1>
-        <p className="serif mt-2 text-3xl font-medium leading-none tracking-tight sm:text-5xl" style={{ color: C.gold }}>
+        <p className="serif mt-2 text-2xl font-medium leading-none tracking-tight sm:text-3xl lg:text-5xl" style={{ color: C.gold }}>
           Cross Sell
         </p>
         <div className="mt-5 h-px w-16" style={{ background: C.gold }} />
@@ -40,10 +40,10 @@ export function BrandHero({
       <p className="text-[11px] font-medium uppercase tracking-[0.32em]" style={{ color: C.gold }}>
         {kicker ?? "Production desk"}
       </p>
-      <h1 className="serif mt-4 text-5xl font-semibold leading-[0.9] tracking-tight sm:text-7xl" style={{ color: C.ink }}>
+      <h1 className="serif mt-4 text-[2.5rem] font-semibold leading-[0.9] tracking-tight sm:text-5xl lg:text-7xl" style={{ color: C.ink }}>
         Team Victory
       </h1>
-      <p className="serif mt-3 text-4xl font-medium leading-none tracking-tight sm:text-6xl" style={{ color: C.navy }}>
+      <p className="serif mt-3 text-3xl font-medium leading-none tracking-tight sm:text-4xl lg:text-6xl" style={{ color: C.navy }}>
         Cross Sell
       </p>
       <div className="mt-6 h-px w-20" style={{ background: C.gold }} />

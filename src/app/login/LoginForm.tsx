@@ -62,7 +62,10 @@ export default function LoginForm({
         </p>
       </aside>
 
-      <div className="flex items-center justify-center p-4 safe-bottom sm:p-8">
+      <div
+        className="flex items-center justify-center p-4 safe-bottom sm:p-8"
+        style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }}
+      >
         <div className="w-full max-w-lg">
           <div className="mb-6 lg:hidden">
             <p className="text-[11px] uppercase tracking-[0.28em]" style={{ color: C.gold }}>

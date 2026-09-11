@@ -5,7 +5,6 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { AlertTriangle, Check, Clock, Send } from "lucide-react";
 import { BrandHero } from "@/components/brand-hero";
-import { DemoSwitcher } from "@/components/demo-switcher";
 import { Inbox } from "@/components/inbox";
 import { C, EmptyState, NumInput, PrimaryButton, StatTile, TopBar } from "@/components/ui";
 import { achievementColor, fmtLakh, num, parseLoose, whenText } from "@/lib/format";
@@ -96,7 +95,6 @@ export default function RMWorkspace({
           title={`Hello, ${profile.full_name.split(" ")[0]}`}
           subtitle="Submit your monthly figures"
           onSignOut={signOut}
-          right={mode === "demo" ? <DemoSwitcher currentId={profile.id} /> : undefined}
         />
         <div className="mx-auto max-w-4xl space-y-4 p-3 safe-bottom sm:p-5">
           <BrandHero compact kicker="Home" sub={`Your figures · ${profile.full_name}`} />
@@ -196,9 +194,7 @@ export default function RMWorkspace({
         status={status}
         onSignOut={signOut}
         right={
-          <>
-            {mode === "demo" ? <DemoSwitcher currentId={profile.id} /> : null}
-            <select
+          <select
               value={activeMonth}
               onChange={(e) => setActiveMonth(e.target.value)}
               className="desk-btn min-h-11 rounded-lg px-3 py-1.5 text-sm font-medium text-white outline-none"
@@ -211,7 +207,6 @@ export default function RMWorkspace({
                 </option>
               ))}
             </select>
-          </>
         }
       />
 

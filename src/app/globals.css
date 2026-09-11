@@ -79,17 +79,9 @@ textarea {
   transition: transform 0.12s ease-out, border-color 0.12s ease-out;
 }
 
-.desk-card-hover:hover {
-  transform: translateY(-1px);
-  border-color: #cfd5e8;
-}
-
 .desk-btn {
   transition: transform 0.12s ease-out, background-color 0.12s ease-out, border-color 0.12s ease-out;
-}
-
-.desk-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .desk-btn:active:not(:disabled) {
@@ -109,27 +101,13 @@ textarea {
   transition: background-color 0.12s ease-out;
 }
 
-.desk-row:hover {
-  background: #eef1f8 !important;
-}
-
 .desk-chip {
   transition: border-color 0.12s ease-out, color 0.12s ease-out, transform 0.12s ease-out;
 }
 
-.desk-chip:hover:not(:disabled) {
-  border-color: var(--navy) !important;
-  color: var(--navy) !important;
-  transform: translateY(-1px);
-}
-
 .desk-person {
   transition: border-color 0.12s ease-out, transform 0.12s ease-out;
-}
-
-.desk-person:hover:not(:disabled) {
-  border-color: var(--navy) !important;
-  transform: translateY(-1px);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .desk-person:focus-visible {
@@ -137,8 +115,34 @@ textarea {
   outline-offset: 2px;
 }
 
-.desk-nav:hover {
-  color: var(--navy) !important;
+@media (hover: hover) and (pointer: fine) {
+  .desk-card-hover:hover {
+    transform: translateY(-1px);
+    border-color: #cfd5e8;
+  }
+
+  .desk-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  .desk-row:hover {
+    background: #eef1f8 !important;
+  }
+
+  .desk-chip:hover:not(:disabled) {
+    border-color: var(--navy) !important;
+    color: var(--navy) !important;
+    transform: translateY(-1px);
+  }
+
+  .desk-person:hover:not(:disabled) {
+    border-color: var(--navy) !important;
+    transform: translateY(-1px);
+  }
+
+  .desk-nav:hover {
+    color: var(--navy) !important;
+  }
 }
 
 .desk-panel {
