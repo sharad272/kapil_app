@@ -23,10 +23,18 @@ export default function ApeChart({
         <CartesianGrid strokeDasharray="3 3" stroke={C.lineSoft} vertical={false} />
         <XAxis dataKey="month" tick={{ fontSize: 11, fill: C.slate }} axisLine={{ stroke: C.line }} tickLine={false} />
         <YAxis tick={{ fontSize: 11, fill: C.slate }} axisLine={false} tickLine={false} />
-        <Tooltip contentStyle={{ borderRadius: 6, border: `1px solid ${C.line}`, fontSize: 13 }} />
-        <Legend wrapperStyle={{ fontSize: 11 }} />
+        <Tooltip
+          contentStyle={{
+            borderRadius: 6,
+            border: `1px solid ${C.line}`,
+            fontSize: 13,
+            background: C.panel,
+            color: C.ink,
+          }}
+        />
+        <Legend wrapperStyle={{ fontSize: 11, color: C.slate }} />
         <Bar dataKey="Target" fill={C.lineSoft} radius={[3, 3, 0, 0]} />
-        <Bar dataKey="APE" fill={C.navy} radius={[3, 3, 0, 0]} />
+        <Bar dataKey="APE" fill={C.chart} radius={[3, 3, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );

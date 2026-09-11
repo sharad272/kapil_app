@@ -141,7 +141,7 @@ export function TeamDesk({
                 <div className="flex min-w-0 items-center gap-3">
                   <span
                     className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold"
-                    style={{ background: C.lineSoft, color: C.navy }}
+                    style={{ background: C.lineSoft, color: C.heading }}
                   >
                     {initials(rm.full_name)}
                   </span>

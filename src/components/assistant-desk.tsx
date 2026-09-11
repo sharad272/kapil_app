@@ -32,7 +32,7 @@ export function RiskBoard({
   const ranked = [...kpis].filter((k) => k.flags.length).sort((a, b) => b.flags.length - a.flags.length);
   if (!ranked.length) {
     return (
-      <div className="flex items-start gap-3 rounded-lg px-4 py-3" style={{ background: C.greenBg, border: "1px solid #BEDECB" }}>
+      <div className="flex items-start gap-3 rounded-lg px-4 py-3" style={{ background: C.greenBg, border: `1px solid ${C.greenLine}` }}>
         <Check size={16} style={{ color: C.green }} className="mt-0.5 shrink-0" />
         <div>
           <div className="text-sm font-semibold" style={{ color: C.green }}>
@@ -68,7 +68,7 @@ export function RiskBoard({
             type="button"
             onClick={() => onAsk(`Nudge ${rm.name}`)}
             className="desk-chip rounded-lg px-2.5 py-1.5 text-left"
-            style={{ background: C.amberBg, border: "1px solid #EBD3AE" }}
+            style={{ background: C.amberBg, border: `1px solid ${C.amberLine}` }}
           >
             <div className="text-xs font-semibold" style={{ color: C.ink }}>
               {rm.name.split(" ")[0]}
@@ -410,7 +410,7 @@ export function AssistantDesk({
               type="button"
               onClick={() => void openRm(picked[0].id)}
               className="mt-3 block text-xs underline"
-              style={{ color: C.navy }}
+              style={{ color: C.heading }}
             >
               Open {picked[0].name.split(" ")[0]}&apos;s inbox (preview)
             </button>

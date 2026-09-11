@@ -15,7 +15,7 @@ import type { AppMode, Assignment, Certification, MonthRow, Profile, Submission 
 
 const ApeChart = dynamic(() => import("@/components/ape-chart"), {
   ssr: false,
-  loading: () => <div className="h-[220px] animate-pulse rounded-lg" style={{ background: "#EEF1F8" }} />,
+  loading: () => <div className="h-[220px] animate-pulse rounded-lg" style={{ background: C.lineSoft }} />,
 });
 
 export default function RMWorkspace({
@@ -233,7 +233,7 @@ export default function RMWorkspace({
           </div>
         )}
         {cur.submitted_at && (
-          <div className="flex items-start gap-3 rounded-lg px-4 py-3" style={{ background: C.greenBg, border: "1px solid #BEDECB" }}>
+          <div className="flex items-start gap-3 rounded-lg px-4 py-3" style={{ background: C.greenBg, border: `1px solid ${C.greenLine}` }}>
             <Check size={16} style={{ color: C.green }} className="mt-0.5 shrink-0" />
             <div className="flex-1">
               <div className="text-sm font-semibold" style={{ color: C.green }}>

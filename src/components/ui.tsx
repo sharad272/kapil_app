@@ -24,7 +24,7 @@ export function Avatar({
         width: size,
         height: size,
         background: gold ? C.gold : C.navy,
-        color: gold ? C.navyDeep : "#fff",
+        color: gold ? C.navyDeep : C.onNavy,
         fontSize: size < 32 ? 10 : 12,
       }}
     >
@@ -72,7 +72,7 @@ export function StatTile({
       <div className="mb-1 text-[11px] font-medium uppercase tracking-[0.14em]" style={{ color: C.slate }}>
         {label}
       </div>
-      <div className="text-xl font-semibold leading-tight tabular-nums sm:text-2xl" style={{ color: valueColor || C.navy }}>
+      <div className="text-xl font-semibold leading-tight tabular-nums sm:text-2xl" style={{ color: valueColor || C.heading }}>
         {value}
       </div>
       <div className="mt-1 flex flex-wrap items-baseline gap-2">
@@ -140,7 +140,7 @@ export function PrimaryButton({
       onClick={onClick}
       disabled={disabled}
       className={`desk-btn inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium disabled:opacity-40 ${block ? "w-full" : ""}`}
-      style={{ background: bg, color: tone === "gold" ? C.navyDeep : "#fff" }}
+      style={{ background: bg, color: tone === "gold" ? C.navyDeep : C.onNavy }}
     >
       {Icon ? <Icon size={15} /> : null}
       {children}
@@ -168,7 +168,7 @@ export function GhostButton({
       disabled={disabled}
       className="desk-btn inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium disabled:opacity-40"
       style={{
-        border: `1px solid ${danger ? "#F0C4B8" : C.line}`,
+        border: `1px solid ${danger ? C.redLine : C.line}`,
         color: danger ? C.red : C.ink,
         background: C.panel,
       }}
@@ -237,14 +237,16 @@ export function TopBar({
               type="button"
               aria-label="Go back"
               onClick={onBack}
-              className="desk-btn mt-0.5 inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg text-white sm:hidden"
-              style={{ background: C.navyDeep, border: `1px solid ${C.navyMid}` }}
+              className="desk-btn mt-0.5 inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg sm:hidden"
+              style={{ background: C.navyDeep, border: `1px solid ${C.navyMid}`, color: C.onNavy }}
             >
               <ChevronLeft size={20} />
             </button>
           ) : null}
           <div className="min-w-0">
-            <div className="serif text-lg font-semibold tracking-tight text-white sm:text-xl">{title}</div>
+            <div className="serif text-lg font-semibold tracking-tight sm:text-xl" style={{ color: C.onNavy }}>
+              {title}
+            </div>
             <div className="mt-0.5 text-xs" style={{ color: C.ice }}>
               {subtitle}
             </div>
@@ -259,8 +261,8 @@ export function TopBar({
           {right}
           <button
             onClick={onSignOut}
-            className="desk-btn min-h-11 rounded-lg px-3 py-1.5 text-xs font-medium text-white"
-            style={{ background: C.navyDeep, border: `1px solid ${C.navyMid}` }}
+            className="desk-btn min-h-11 rounded-lg px-3 py-1.5 text-xs font-medium"
+            style={{ background: C.navyDeep, border: `1px solid ${C.navyMid}`, color: C.onNavy }}
           >
             Sign out
           </button>

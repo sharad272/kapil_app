@@ -57,7 +57,7 @@ export function DemoEntry({
           onClick={() => void enter(teamLead.id, "/tl")}
           disabled={busy !== null}
           className="desk-person flex min-h-14 w-full items-center gap-3 rounded-xl px-3.5 py-3 text-left disabled:opacity-40"
-          style={{ border: `1px solid ${C.navy}`, background: C.navy, color: "#fff" }}
+          style={{ border: `1px solid ${C.navy}`, background: C.navy, color: C.onNavy }}
         >
           <Avatar name={teamLead.full_name} gold size={40} />
           <span className="min-w-0 flex-1">

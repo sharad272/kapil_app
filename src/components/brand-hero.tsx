@@ -43,7 +43,7 @@ export function BrandHero({
       <h1 className="serif mt-4 text-[2.5rem] font-semibold leading-[0.9] tracking-tight sm:text-5xl lg:text-7xl" style={{ color: C.ink }}>
         Team Victory
       </h1>
-      <p className="serif mt-3 text-3xl font-medium leading-none tracking-tight sm:text-4xl lg:text-6xl" style={{ color: C.navy }}>
+      <p className="serif mt-3 text-3xl font-medium leading-none tracking-tight sm:text-4xl lg:text-6xl" style={{ color: C.heading }}>
         Cross Sell
       </p>
       <div className="mt-6 h-px w-20" style={{ background: C.gold }} />

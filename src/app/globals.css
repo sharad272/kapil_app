@@ -1,14 +1,77 @@
 @import "tailwindcss";
 
-:root {
+:root,
+html[data-theme="day"] {
+  color-scheme: light;
   --paper: #f4f5fa;
+  --panel: #ffffff;
   --ink: #1b1f3b;
+  --heading: #1e2761;
   --navy: #1e2761;
   --navy-deep: #10153a;
+  --navy-mid: #2a3470;
   --gold: #c9a24b;
   --line: #e2e6f2;
+  --line-soft: #eef1f8;
   --slate: #5b6484;
+  --slate-light: #8b93ae;
+  --green: #2e8b57;
+  --green-bg: #eaf5ef;
+  --green-line: #bedecb;
+  --red: #c0392b;
+  --red-bg: #fdeded;
+  --red-line: #f0c4b8;
+  --amber: #c9822f;
+  --amber-bg: #fdf3e6;
+  --amber-line: #ebd3ae;
+  --ice: #cadcfc;
+  --teal: #50808e;
+  --on-navy: #ffffff;
+  --chart: #1e2761;
+  --hero-1: #10153a;
+  --hero-2: #1e2761;
+  --hero-3: #2a3470;
+  --input-focus: #8ea2e0;
+  --focus-ring: rgba(30, 39, 97, 0.12);
+  --hover-row: #eef1f8;
+  --hover-border: #cfd5e8;
   --swipe-dx: 0px;
+}
+
+html[data-theme="night"] {
+  color-scheme: dark;
+  --paper: #0b1020;
+  --panel: #141a32;
+  --ink: #e8eaf4;
+  --heading: #f0d78c;
+  --navy: #1e2761;
+  --navy-deep: #070a16;
+  --navy-mid: #3a4580;
+  --gold: #d4b36a;
+  --line: #2c355c;
+  --line-soft: #1c2444;
+  --slate: #9aa3c0;
+  --slate-light: #7b84a3;
+  --green: #5fbf88;
+  --green-bg: #143024;
+  --green-line: #2a5a40;
+  --red: #e07a72;
+  --red-bg: #3a1c1a;
+  --red-line: #5a2a28;
+  --amber: #e0a85a;
+  --amber-bg: #3a2c14;
+  --amber-line: #5a4520;
+  --ice: #c5d4f5;
+  --teal: #7aadc0;
+  --on-navy: #ffffff;
+  --chart: #d4b36a;
+  --hero-1: #070a16;
+  --hero-2: #12183a;
+  --hero-3: #1a2048;
+  --input-focus: #8ea2e0;
+  --focus-ring: rgba(212, 179, 106, 0.2);
+  --hover-row: #1c2444;
+  --hover-border: #3a4580;
 }
 
 html,
@@ -28,7 +91,7 @@ body {
 }
 
 ::selection {
-  background: #cadcfc;
+  background: color-mix(in srgb, var(--gold) 35%, var(--ice));
   color: var(--navy-deep);
 }
 
@@ -71,7 +134,7 @@ textarea {
 }
 
 .desk-card {
-  background: #fff;
+  background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 0.9rem;
   contain: layout style;
@@ -95,8 +158,8 @@ textarea {
 }
 
 .desk-input:focus {
-  border-color: #8ea2e0 !important;
-  box-shadow: 0 0 0 3px rgba(30, 39, 97, 0.12);
+  border-color: var(--input-focus) !important;
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 .desk-row {
@@ -120,7 +183,7 @@ textarea {
 @media (hover: hover) and (pointer: fine) {
   .desk-card-hover:hover {
     transform: translateY(-1px);
-    border-color: #cfd5e8;
+    border-color: var(--hover-border);
   }
 
   .desk-btn:hover:not(:disabled) {
@@ -128,22 +191,22 @@ textarea {
   }
 
   .desk-row:hover {
-    background: #eef1f8 !important;
+    background: var(--hover-row) !important;
   }
 
   .desk-chip:hover:not(:disabled) {
-    border-color: var(--navy) !important;
-    color: var(--navy) !important;
+    border-color: var(--heading) !important;
+    color: var(--heading) !important;
     transform: translateY(-1px);
   }
 
   .desk-person:hover:not(:disabled) {
-    border-color: var(--navy) !important;
+    border-color: var(--heading) !important;
     transform: translateY(-1px);
   }
 
   .desk-nav:hover {
-    color: var(--navy) !important;
+    color: var(--heading) !important;
   }
 }
 
@@ -179,8 +242,13 @@ textarea:focus-visible {
 
 .hero-grid {
   background-image:
-    linear-gradient(135deg, rgba(201, 162, 75, 0.12) 0%, transparent 42%),
-    linear-gradient(160deg, #10153a 0%, #1e2761 58%, #2a3470 100%);
+    linear-gradient(135deg, color-mix(in srgb, var(--gold) 18%, transparent) 0%, transparent 42%),
+    linear-gradient(160deg, var(--hero-1) 0%, var(--hero-2) 58%, var(--hero-3) 100%);
+}
+
+.desk-header {
+  background: linear-gradient(180deg, var(--navy-deep) 0%, var(--navy) 100%);
+  border-bottom: 2px solid var(--gold);
 }
 
 @media (prefers-reduced-motion: reduce) {

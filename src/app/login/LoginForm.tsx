@@ -74,13 +74,15 @@ export default function LoginForm({
             <h1 className="serif mt-2 text-3xl font-semibold" style={{ color: C.ink }}>
               Team Victory
             </h1>
-            <p className="serif text-2xl" style={{ color: C.navy }}>
+            <p className="serif text-2xl" style={{ color: C.heading }}>
               Cross Sell
             </p>
           </div>
           <div className="desk-card overflow-hidden">
             <div className="px-6 py-5" style={{ background: C.navy }}>
-              <div className="text-lg font-semibold text-white">Open a desk</div>
+              <div className="text-lg font-semibold" style={{ color: C.onNavy }}>
+                Open a desk
+              </div>
               <div className="mt-1 text-xs leading-5" style={{ color: C.ice }}>
                 {supabaseEnabled
                   ? "Sign in with your work email, or open a seeded desk below."
@@ -121,7 +123,7 @@ export default function LoginForm({
                       placeholder="you@company.com"
                       className="desk-input mb-3 w-full rounded-lg px-3 py-2.5 text-sm outline-none"
                       style={{
-                        border: `1px solid ${error ? "#F0C4B8" : C.line}`,
+                        border: `1px solid ${error ? C.redLine : C.line}`,
                         background: C.panel,
                         color: C.ink,
                       }}
@@ -145,7 +147,7 @@ export default function LoginForm({
               </div>
             </div>
           </div>
-          <div className="mt-4 flex items-start gap-3 rounded-xl px-4 py-3" style={{ background: C.amberBg, border: "1px solid #EBD3AE" }}>
+          <div className="mt-4 flex items-start gap-3 rounded-xl px-4 py-3" style={{ background: C.amberBg, border: `1px solid ${C.amberLine}` }}>
             <ShieldAlert size={16} style={{ color: C.amber }} className="mt-0.5 shrink-0" />
             <div className="text-xs leading-5" style={{ color: C.ink }}>
               Relationship managers see only their own figures. Team leads see the whole team.{" "}

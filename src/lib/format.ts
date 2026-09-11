@@ -42,10 +42,10 @@ export function initials(name: string): string {
 }
 
 export function achievementColor(a: number | null): string {
-  if (a === null) return "#8B93AE";
-  if (a >= 100) return "#2E8B57";
-  if (a >= 80) return "#C9822F";
-  return "#C0392B";
+  if (a === null) return "var(--slate-light)";
+  if (a >= 100) return "var(--green)";
+  if (a >= 80) return "var(--amber)";
+  return "var(--red)";
 }
 
 export function whenText(iso: string | null): string {

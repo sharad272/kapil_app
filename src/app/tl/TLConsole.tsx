@@ -443,7 +443,7 @@ export default function TLConsole({
               aria-label={n.label}
               className="desk-nav inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap px-3 py-3 text-sm font-medium transition-colors sm:px-3.5"
               style={{
-                color: tab === n.id ? C.navy : C.slate,
+                color: tab === n.id ? C.heading : C.slate,
                 borderBottom: `2px solid ${tab === n.id ? C.gold : "transparent"}`,
                 background: tab === n.id ? C.paper : "transparent",
               }}
@@ -509,7 +509,7 @@ export default function TLConsole({
               </div>
             ) : (
               team.length > 0 && (
-                <div className="flex items-center gap-3 rounded-lg px-4 py-3" style={{ background: C.greenBg, border: "1px solid #BEDECB" }}>
+                <div className="flex items-center gap-3 rounded-lg px-4 py-3" style={{ background: C.greenBg, border: `1px solid ${C.greenLine}` }}>
                   <Check size={17} style={{ color: C.green }} />
                   <div className="text-sm font-semibold" style={{ color: C.green }}>
                     Everyone has submitted for {monthLabel}
@@ -800,7 +800,7 @@ export default function TLConsole({
                             {cell(c?.ulip)}
                             {cell(c?.endowment)}
                             {cell(c?.term)}
-                            <td className="px-3 py-2 text-right font-semibold tabular-nums" style={{ color: C.navy }}>
+                            <td className="px-3 py-2 text-right font-semibold tabular-nums" style={{ color: C.heading }}>
                               {avg === null ? "—" : avg.toFixed(1)}
                             </td>
                           </tr>

@@ -7,7 +7,7 @@ import { hasSupabase } from "@/lib/theme";
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-dvh" style={{ background: "#F7F8FC" }} />}>
+    <Suspense fallback={<div className="min-h-dvh" style={{ background: "var(--paper)" }} />}>
       <LoginGate />
     </Suspense>
   );

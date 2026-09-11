@@ -5,7 +5,7 @@ import { getSession } from "@/lib/session";
 
 export default function Home() {
   return (
-    <Suspense fallback={<div className="min-h-screen" style={{ background: "#F7F8FC" }} />}>
+    <Suspense fallback={<div className="min-h-screen" style={{ background: "var(--paper)" }} />}>
       <HomeGate />
     </Suspense>
   );

@@ -1,6 +1,6 @@
 import { cacheLife } from "next/cache";
 import Link from "next/link";
-import { hasSupabase } from "@/lib/theme";
+import { hasSupabase, C } from "@/lib/theme";
 import { DEMO_RMS, DEMO_TL } from "@/lib/demo-data";
 import { DemoEntry } from "@/components/demo-entry";
 import { BrandHero } from "@/components/brand-hero";
@@ -24,23 +24,26 @@ export async function Landing() {
   "use cache";
   cacheLife("days");
   return (
-    <div className="min-h-dvh" style={{ background: "#F4F5FA" }}>
+    <div className="min-h-dvh" style={{ background: C.paper }}>
       <header
-        className="px-4 py-4 sm:px-6 sm:py-5"
-        style={{
-          background: "linear-gradient(180deg, #10153A 0%, #1E2761 100%)",
-          paddingTop: "max(1rem, env(safe-area-inset-top))",
-          borderBottom: "2px solid #C9A24B",
-        }}
+        className="desk-header px-4 py-4 sm:px-6 sm:py-5"
+        style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }}
       >
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
           <div>
-            <p className="serif text-sm font-semibold tracking-wide text-white">Team Victory</p>
-            <p className="text-[11px] uppercase tracking-[0.2em]" style={{ color: "#C9A24B" }}>
+            <p className="serif text-sm font-semibold tracking-wide" style={{ color: C.onNavy }}>
+              Team Victory
+            </p>
+            <p className="text-[11px] uppercase tracking-[0.2em]" style={{ color: C.gold }}>
               Cross Sell
             </p>
           </div>
-          <Link href="/how-it-works" prefetch={false} className="desk-btn min-h-11 inline-flex items-center rounded-lg px-3 text-xs" style={{ color: "#CADCFC", border: "1px solid #2A3470" }}>
+          <Link
+            href="/how-it-works"
+            prefetch={false}
+            className="desk-btn min-h-11 inline-flex items-center rounded-lg px-3 text-xs"
+            style={{ color: C.ice, border: `1px solid ${C.navyMid}` }}
+          >
             How access works
           </Link>
         </div>
@@ -59,10 +62,10 @@ export async function Landing() {
                 ["₹6L", "APE target"],
               ].map(([k, v]) => (
                 <div key={v}>
-                  <dt className="serif text-2xl font-semibold" style={{ color: "#1E2761" }}>
+                  <dt className="serif text-2xl font-semibold" style={{ color: C.heading }}>
                     {k}
                   </dt>
-                  <dd className="mt-1 text-[11px] uppercase tracking-[0.12em]" style={{ color: "#5B6484" }}>
+                  <dd className="mt-1 text-[11px] uppercase tracking-[0.12em]" style={{ color: C.slate }}>
                     {v}
                   </dd>
                 </div>
@@ -70,10 +73,10 @@ export async function Landing() {
             </dl>
           </div>
           <div className="desk-card p-6 sm:p-7">
-            <p className="text-sm font-semibold" style={{ color: "#1B1F3B" }}>
+            <p className="text-sm font-semibold" style={{ color: C.ink }}>
               Open the desk
             </p>
-            <p className="mt-1 text-xs leading-5" style={{ color: "#5B6484" }}>
+            <p className="mt-1 text-xs leading-5" style={{ color: C.slate }}>
               Choose Kapil Sharma or a relationship manager. Search the roster if you already know the name.
             </p>
             <DemoEntry
@@ -86,10 +89,10 @@ export async function Landing() {
         <section className="mt-14 grid gap-4 sm:grid-cols-3">
           {POINTS.map((p) => (
             <article key={p.title} className="desk-card desk-card-hover p-5">
-              <h2 className="text-sm font-semibold" style={{ color: "#1B1F3B" }}>
+              <h2 className="text-sm font-semibold" style={{ color: C.ink }}>
                 {p.title}
               </h2>
-              <p className="mt-2 text-xs leading-6" style={{ color: "#5B6484" }}>
+              <p className="mt-2 text-xs leading-6" style={{ color: C.slate }}>
                 {p.body}
               </p>
             </article>
