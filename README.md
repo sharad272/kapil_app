@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RM Productivity Portal
 
-## Getting Started
+Monthly APE, FRP, quality and certification tracking for a team of relationship managers. RMs submit their own figures; the team lead sees everyone's.
 
-First, run the development server:
+Live: [kapilapp.vercel.app](https://kapilapp.vercel.app)
+
+Next.js 16 · Vercel · optional Supabase (Postgres + Auth + RLS)
+
+This is the RM portal from `rm-portal.tar.gz`, rebuilt for Cache Components, edge session refresh (`proxy.ts`), coalesced writes, and a preview mode so an interviewer can open the desk without a database.
+
+## Who can see what
+
+Access is enforced in Postgres with row-level security when Supabase is connected. Bypassing the UI does not get you anyone else's data.
+
+| Data | RM | Team lead |
+|---|---|---|
+| Own APE / FRP / policies | read + write | read + correct |
+| Another RM's figures | **no access** | read + correct |
+| Targets, quality scores | read own only | read + write all |
+| Own certification scores | read + write | read + correct |
+| Coaching notes | **no access** | read + write |
+
+Quality is an audit metric. It is not self-reported.
+
+## Run locally
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). Use **Preview as team lead** or **Preview as relationship manager**.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Connect Supabase (production)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Create a project at [supabase.com](https://supabase.com).
+2. SQL Editor → paste `supabase/schema.sql` → Run. Optionally run `supabase/seed.sql`.
+3. Copy `.env.example` to `.env.local` and fill:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `NEXT_PUBLIC_SITE_URL`
+4. After first sign-in, promote yourself:
 
-## Learn More
+```sql
+update public.profiles set role = 'tl' where email = 'you@company.com';
+```
 
-To learn more about Next.js, take a look at the following resources:
+5. In Supabase **Authentication → URL Configuration**, set Site URL and Redirect URLs to `https://your-app.vercel.app/auth/callback` (and localhost for dev).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## What changed for traffic
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Public landing and `/how-it-works` are cached shells. They do not touch submissions.
+- `proxy.ts` refreshes the session and keeps `_next/static` out of the matcher.
+- Figure inputs debounce 450ms so month-end typing is one upsert per field.
+- RM queries select only that user's rows and named columns.
+- Closed months are read-only for the RM.
 
-## Deploy on Vercel
+## Project layout
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+supabase/schema.sql       tables, RLS policies, signup trigger
+src/proxy.ts              session refresh + auth gate
+src/lib/supabase/         browser and server clients
+src/app/rm/               RM workspace
+src/app/tl/               TL console
+src/app/how-it-works/     access model for reviewers
+```
