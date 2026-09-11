@@ -26,6 +26,7 @@ import {
   fmtCr,
   fmtInt,
   fmtLakh,
+  formatInrTyping,
   initials,
   monthMeta,
   num,
@@ -260,8 +261,9 @@ export default function TLConsole({
   }
 
   function saveSubmission(rmId: string, field: "ape" | "frp" | "policies", raw: string) {
-    const value = parseLoose(raw);
     const k = rowKey(rmId, activeMonth);
+    if (subs[k]?.submitted_at || closed) return;
+    const value = parseLoose(raw);
     const next: Submission = {
       ...(subs[k] ?? {
         rm_id: rmId,
@@ -683,9 +685,10 @@ export default function TLConsole({
                     <div className="flex gap-2">
                       <input
                         value={flatTarget}
-                        onChange={(e) => setFlatTarget(e.target.value)}
-                        placeholder="e.g. 600000"
-                        className="w-36 rounded px-2 py-1.5 text-sm tabular-nums outline-none"
+                        onChange={(e) => setFlatTarget(formatInrTyping(e.target.value))}
+                        placeholder="6,00,000 or 6L"
+                        inputMode="decimal"
+                        className="w-40 rounded px-2 py-1.5 text-sm tabular-nums outline-none"
                         style={{ border: `1px solid ${C.line}`, background: C.panel, color: C.ink }}
                       />
                       <GhostButton onClick={applyFlatTarget} icon={Target}>
@@ -702,7 +705,8 @@ export default function TLConsole({
                       {closed ? " · closed" : ""}
                     </div>
                     <div className="mt-0.5 text-xs" style={{ color: C.slate }}>
-                      You set targets and quality scores. APE, FRP and policies come from each RM — edit only to correct a submission.
+                      You set targets and quality scores. APE, FRP and policies come from each RM and lock after they
+                      submit. Amounts use Indian numbering — hundred, thousand, lakh, ten lakh, crore.
                     </div>
                   </div>
                   <TableScroll>
@@ -735,14 +739,20 @@ export default function TLConsole({
                                 )}
                               </td>
                               <td className="px-3 py-1.5" style={{ width: 130 }}>
-                                <NumInput value={a?.target} onChange={(v) => saveAssignment(r.id, "target", v)} placeholder="—" />
+                                <NumInput value={a?.target} onChange={(v) => saveAssignment(r.id, "target", v)} placeholder="—" kind="inr" />
                               </td>
                               <td className="px-3 py-1.5" style={{ width: 100 }}>
                                 <NumInput value={a?.quality_score} onChange={(v) => saveAssignment(r.id, "quality_score", v)} placeholder="—" />
                               </td>
                               {(["ape", "frp", "policies"] as const).map((f) => (
                                 <td key={f} className="px-3 py-1.5" style={{ width: 130 }}>
-                                  <NumInput value={s?.[f]} onChange={(v) => saveSubmission(r.id, f, v)} placeholder="—" />
+                                  <NumInput
+                                    value={s?.[f]}
+                                    onChange={(v) => saveSubmission(r.id, f, v)}
+                                    placeholder="—"
+                                    kind={f === "policies" ? "count" : "inr"}
+                                    disabled={Boolean(s?.submitted_at) || closed}
+                                  />
                                 </td>
                               ))}
                               <td className="px-3 py-1.5 text-right font-semibold tabular-nums" style={{ color: achievementColor(ach), width: 90 }}>

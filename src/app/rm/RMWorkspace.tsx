@@ -135,6 +135,7 @@ export default function RMWorkspace({
   ).filter((c) => c.v !== null && c.v !== undefined && c.v < 70);
 
   function saveField(field: "ape" | "frp" | "policies", raw: string) {
+    if (closed || cur.submitted_at) return;
     const value = parseLoose(raw);
     const next = { ...cur, [field]: value };
     setSubs((s) => ({ ...s, [activeMonth]: next }));
@@ -164,12 +165,11 @@ export default function RMWorkspace({
     });
   }
 
-  async function setSubmitted(on: boolean) {
-    const stamp = on ? new Date().toISOString() : null;
-    const next = { ...cur, submitted_at: stamp };
+  async function submitMonth() {
+    const next = { ...cur, submitted_at: new Date().toISOString() };
     setSubs((s) => ({ ...s, [activeMonth]: next }));
     await persistSubmission(next);
-    setStatus(on ? "Submitted" : "Reopened");
+    setStatus("Submitted");
     if (mode !== "demo") {
       startTransition(() => router.refresh());
     }
@@ -240,14 +240,9 @@ export default function RMWorkspace({
                 Submitted
               </div>
               <div className="mt-0.5 text-xs" style={{ color: C.ink }}>
-                Sent to your team lead on {whenText(cur.submitted_at)}. You can reopen it if something needs correcting.
+                Sent to your team lead on {whenText(cur.submitted_at)}. These figures are locked.
               </div>
             </div>
-            {!closed && (
-              <button onClick={() => setSubmitted(false)} className="shrink-0 text-xs font-medium underline" style={{ color: C.green }}>
-                Reopen
-              </button>
-            )}
           </div>
         )}
 
@@ -278,22 +273,30 @@ export default function RMWorkspace({
               Your figures
             </div>
             <div className="mt-0.5 text-xs" style={{ color: C.slate }}>
-              Enter APE and FRP in rupees. Target and quality score are set by your team lead. Saves are coalesced every 450ms so a typing burst is one write.
+              Enter APE and FRP in rupees. Commas follow Indian numbering as you type — hundred, thousand, lakh, ten
+              lakh, crore. You can also type 5L or 1Cr. After you submit, the figures lock.
             </div>
           </div>
           <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-3">
             {(
               [
-                { key: "ape" as const, label: "Annualised premium equivalent (₹)" },
-                { key: "frp" as const, label: "First-year rated premium (₹)" },
-                { key: "policies" as const, label: "Policies issued" },
+                { key: "ape" as const, label: "Annualised premium equivalent (₹)", kind: "inr" as const },
+                { key: "frp" as const, label: "First-year rated premium (₹)", kind: "inr" as const },
+                { key: "policies" as const, label: "Policies issued", kind: "count" as const },
               ] as const
             ).map((f) => (
               <div key={f.key}>
                 <div className="mb-1.5 text-xs" style={{ color: C.slate }}>
                   {f.label}
                 </div>
-                <NumInput value={cur[f.key]} onChange={(v) => saveField(f.key, v)} placeholder="—" disabled={closed} />
+                <NumInput
+                  value={cur[f.key]}
+                  onChange={(v) => saveField(f.key, v)}
+                  placeholder="—"
+                  disabled={closed || Boolean(cur.submitted_at)}
+                  kind={f.kind}
+                  hint
+                />
               </div>
             ))}
           </div>
@@ -306,7 +309,7 @@ export default function RMWorkspace({
             )}
             {!cur.submitted_at && !closed && (
               <PrimaryButton
-                onClick={() => setSubmitted(true)}
+                onClick={() => void submitMonth()}
                 icon={Send}
                 tone="green"
                 disabled={!num(cur.ape) && !num(cur.frp) && !num(cur.policies)}

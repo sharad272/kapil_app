@@ -5,7 +5,7 @@ import type { LucideIcon } from "lucide-react";
 import { ChevronLeft } from "lucide-react";
 import { ThemeToggle } from "@/components/india-theme";
 import { C } from "@/lib/theme";
-import { initials } from "@/lib/format";
+import { formatInrDisplay, formatInrTyping, inrInputHint, initials } from "@/lib/format";
 
 export { C };
 
@@ -93,27 +93,66 @@ export function NumInput({
   onChange,
   placeholder,
   disabled,
+  kind = "plain",
+  hint = false,
 }: {
   value: number | string | null | undefined;
   onChange: (v: string) => void;
   placeholder?: string;
   disabled?: boolean;
+  kind?: "inr" | "count" | "plain";
+  hint?: boolean;
 }) {
+  const grouped = kind === "inr" || kind === "count";
+  const shown = grouped ? formatInrDisplay(value) : value === null || value === undefined ? "" : String(value);
+  const scale = grouped ? inrInputHint(value) : "";
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const el = e.target;
+    const raw = el.value;
+    const caret = el.selectionStart ?? raw.length;
+    const digitsBefore = raw.slice(0, caret).replace(/\D/g, "").length;
+    const next = grouped ? formatInrTyping(raw) : raw.replace(/[^\d.]/g, "");
+    onChange(next);
+    requestAnimationFrame(() => {
+      let seen = 0;
+      let pos = next.length;
+      for (let i = 0; i < next.length; i++) {
+        if (/\d/.test(next[i])) {
+          seen += 1;
+          if (seen >= digitsBefore) {
+            pos = i + 1;
+            break;
+          }
+        }
+      }
+      el.setSelectionRange(pos, pos);
+    });
+  }
+
   return (
-    <input
-      type="text"
-      inputMode="decimal"
-      disabled={disabled}
-      value={value === null || value === undefined ? "" : String(value)}
-      placeholder={placeholder}
-      onChange={(e) => onChange(e.target.value)}
-      className="desk-input w-full rounded-lg px-2 py-2 text-right text-base tabular-nums outline-none disabled:opacity-60 sm:py-1.5 sm:text-sm"
-      style={{
-        border: `1px solid ${C.line}`,
-        color: C.ink,
-        background: disabled ? C.lineSoft : C.panel,
-      }}
-    />
+    <div>
+      <input
+        type="text"
+        inputMode="decimal"
+        disabled={disabled}
+        value={shown}
+        placeholder={placeholder}
+        title={scale || undefined}
+        onChange={handleChange}
+        className="desk-input w-full rounded-lg px-2 py-2 text-right text-base tabular-nums outline-none disabled:opacity-60 sm:py-1.5 sm:text-sm"
+        style={{
+          border: `1px solid ${C.line}`,
+          color: C.ink,
+          background: disabled ? C.lineSoft : C.panel,
+        }}
+      />
+      {hint && !disabled && scale ? (
+        <p className="mt-1 text-right text-[11px] capitalize" style={{ color: C.slate }}>
+          {scale}
+        </p>
+      ) : null}
+    </div>
   );
 }
 

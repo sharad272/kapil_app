@@ -5,10 +5,62 @@ export function num(v: unknown): number {
 
 export function parseLoose(raw: string | number | null | undefined): number | null {
   if (raw === null || raw === undefined) return null;
-  const cleaned = String(raw).replace(/[₹,\s]/g, "");
-  if (cleaned === "") return null;
-  const n = Number(cleaned);
-  return Number.isFinite(n) ? n : null;
+  if (typeof raw === "number") return Number.isFinite(raw) ? raw : null;
+  const cleaned = String(raw).trim().replace(/₹/g, "").replace(/,/g, "").replace(/\s+/g, "");
+  if (cleaned === "" || cleaned === "-" || cleaned === ".") return null;
+  const m = cleaned.match(/^(-?\d*\.?\d+)(k|l|lac|lakh|cr|crore)?$/i);
+  if (!m) return null;
+  let n = Number(m[1]);
+  if (!Number.isFinite(n)) return null;
+  const u = (m[2] || "").toLowerCase();
+  if (u === "k") n *= 1_000;
+  else if (u === "l" || u === "lac" || u === "lakh") n *= 100_000;
+  else if (u === "cr" || u === "crore") n *= 10_000_000;
+  return n;
+}
+
+/** Indian grouping as digits are typed: 123 → 1,23,456 → 12,34,567. */
+export function formatInrTyping(raw: string): string {
+  const parsed = parseLoose(raw);
+  if (parsed === null) {
+    const digits = raw.replace(/[₹,\s]/g, "");
+    if (digits === "" || digits === "-") return digits;
+    return raw;
+  }
+  const fraction = !Number.isInteger(parsed);
+  return new Intl.NumberFormat("en-IN", {
+    maximumFractionDigits: fraction ? 2 : 0,
+  }).format(parsed);
+}
+
+export function formatInrDisplay(value: number | string | null | undefined): string {
+  if (value === null || value === undefined || value === "") return "";
+  const n = typeof value === "number" ? value : parseLoose(value);
+  if (n === null) return String(value);
+  return new Intl.NumberFormat("en-IN", { maximumFractionDigits: Number.isInteger(n) ? 0 : 2 }).format(n);
+}
+
+/** Scale name by digit length: hundred, thousand, lakh, ten lakh, crore… */
+export function inrDigitScale(n: number): string {
+  const digits = String(Math.floor(Math.abs(n))).replace(/^0+/, "").length || 1;
+  if (digits <= 2) return "";
+  if (digits === 3) return "hundred";
+  if (digits === 4) return "thousand";
+  if (digits === 5) return "ten thousand";
+  if (digits === 6) return "lakh";
+  if (digits === 7) return "ten lakh";
+  if (digits === 8) return "crore";
+  if (digits === 9) return "ten crore";
+  if (digits === 10) return "hundred crore";
+  return "thousand crore";
+}
+
+export function inrInputHint(value: number | string | null | undefined): string {
+  const n = typeof value === "number" ? value : parseLoose(value);
+  if (n === null) return "";
+  const scale = inrDigitScale(n);
+  const spoken = Math.abs(n) >= 10_000_000 ? fmtCr(n) : Math.abs(n) >= 100_000 ? fmtLakh(n) : "";
+  return [scale, spoken && spoken !== "—" ? spoken : ""].filter(Boolean).join(" · ");
 }
 
 export function fmtLakh(v: number | null | undefined, dp = 1): string {
