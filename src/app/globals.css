@@ -8,8 +8,6 @@
   --gold: #c9a24b;
   --line: #e2e6f2;
   --slate: #5b6484;
-  --shadow: 0 12px 40px rgba(16, 21, 58, 0.08);
-  --shadow-hover: 0 16px 44px rgba(16, 21, 58, 0.14);
 }
 
 html,
@@ -74,41 +72,32 @@ textarea {
   background: #fff;
   border: 1px solid var(--line);
   border-radius: 0.9rem;
-  box-shadow: 0 1px 0 rgba(16, 21, 58, 0.03);
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    border-color 0.2s ease;
+  contain: layout style;
+}
+
+.desk-card-hover {
+  transition: transform 0.12s ease-out, border-color 0.12s ease-out;
 }
 
 .desk-card-hover:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   border-color: #cfd5e8;
-  box-shadow: var(--shadow);
 }
 
 .desk-btn {
-  transition:
-    transform 0.15s ease,
-    filter 0.15s ease,
-    box-shadow 0.15s ease,
-    background-color 0.15s ease,
-    border-color 0.15s ease;
+  transition: transform 0.12s ease-out, background-color 0.12s ease-out, border-color 0.12s ease-out;
 }
 
 .desk-btn:hover:not(:disabled) {
-  filter: brightness(1.08);
-  box-shadow: 0 8px 18px rgba(16, 21, 58, 0.18);
+  transform: translateY(-1px);
 }
 
 .desk-btn:active:not(:disabled) {
-  transform: translateY(1px) scale(0.985);
+  transform: translateY(1px);
 }
 
 .desk-input {
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
+  transition: border-color 0.12s ease-out, box-shadow 0.12s ease-out;
 }
 
 .desk-input:focus {
@@ -117,7 +106,7 @@ textarea {
 }
 
 .desk-row {
-  transition: background-color 0.15s ease;
+  transition: background-color 0.12s ease-out;
 }
 
 .desk-row:hover {
@@ -125,31 +114,21 @@ textarea {
 }
 
 .desk-chip {
-  transition:
-    background-color 0.15s ease,
-    border-color 0.15s ease,
-    color 0.15s ease,
-    transform 0.15s ease;
+  transition: border-color 0.12s ease-out, color 0.12s ease-out, transform 0.12s ease-out;
 }
 
 .desk-chip:hover:not(:disabled) {
-  background: #fff !important;
   border-color: var(--navy) !important;
   color: var(--navy) !important;
   transform: translateY(-1px);
 }
 
 .desk-person {
-  transition:
-    border-color 0.18s ease,
-    box-shadow 0.18s ease,
-    background-color 0.18s ease,
-    transform 0.18s ease;
+  transition: border-color 0.12s ease-out, transform 0.12s ease-out;
 }
 
 .desk-person:hover:not(:disabled) {
   border-color: var(--navy) !important;
-  box-shadow: 0 10px 24px rgba(30, 39, 97, 0.1);
   transform: translateY(-1px);
 }
 
@@ -160,6 +139,21 @@ textarea {
 
 .desk-nav:hover {
   color: var(--navy) !important;
+}
+
+.desk-panel {
+  animation: desk-in 0.14s ease-out;
+}
+
+@keyframes desk-in {
+  from {
+    opacity: 0.45;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 button:focus-visible,
@@ -174,23 +168,25 @@ textarea:focus-visible {
 .hero-grid {
   background-image:
     linear-gradient(135deg, rgba(201, 162, 75, 0.12) 0%, transparent 42%),
-    radial-gradient(circle at 88% 12%, rgba(202, 220, 252, 0.18), transparent 32%),
-    linear-gradient(160deg, #10153a 0%, #1e2761 52%, #2a3470 100%);
+    linear-gradient(160deg, #10153a 0%, #1e2761 58%, #2a3470 100%);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .desk-card,
+  .desk-card-hover,
   .desk-btn,
   .desk-input,
   .desk-row,
   .desk-chip,
-  .desk-person {
+  .desk-person,
+  .desk-panel {
     transition: none;
+    animation: none;
   }
 
   .desk-card-hover:hover,
   .desk-person:hover:not(:disabled),
-  .desk-chip:hover:not(:disabled) {
+  .desk-chip:hover:not(:disabled),
+  .desk-btn:hover:not(:disabled) {
     transform: none;
   }
 }

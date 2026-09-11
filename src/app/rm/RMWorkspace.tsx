@@ -1,18 +1,9 @@
 "use client";
 
 import { useMemo, useRef, useState, useTransition } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { AlertTriangle, Check, Clock, Send } from "lucide-react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Legend,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 import { BrandHero } from "@/components/brand-hero";
 import { DemoSwitcher } from "@/components/demo-switcher";
 import { Inbox } from "@/components/inbox";
@@ -21,6 +12,11 @@ import { achievementColor, fmtLakh, num, parseLoose, whenText } from "@/lib/form
 import { hasSupabase } from "@/lib/theme";
 import { createClient } from "@/lib/supabase/client";
 import type { AppMode, Assignment, Certification, MonthRow, Profile, Submission } from "@/lib/types";
+
+const ApeChart = dynamic(() => import("@/components/ape-chart"), {
+  ssr: false,
+  loading: () => <div className="h-[220px] animate-pulse rounded-lg" style={{ background: "#EEF1F8" }} />,
+});
 
 export default function RMWorkspace({
   profile,
@@ -75,7 +71,7 @@ export default function RMWorkspace({
     if (timers.current[id]) clearTimeout(timers.current[id]);
     timers.current[id] = setTimeout(() => {
       void work();
-    }, 450);
+    }, 280);
   }
 
   async function persistSubmission(next: Submission) {
@@ -358,17 +354,7 @@ export default function RMWorkspace({
             <div className="mb-3 text-sm font-semibold" style={{ color: C.ink }}>
               Your months so far, in ₹ lakh
             </div>
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke={C.lineSoft} vertical={false} />
-                <XAxis dataKey="month" tick={{ fontSize: 11, fill: C.slate }} axisLine={{ stroke: C.line }} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: C.slate }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{ borderRadius: 6, border: `1px solid ${C.line}`, fontSize: 13 }} />
-                <Legend wrapperStyle={{ fontSize: 11 }} />
-                <Bar dataKey="Target" fill={C.lineSoft} radius={[3, 3, 0, 0]} />
-                <Bar dataKey="APE" fill={C.navy} radius={[3, 3, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <ApeChart data={chartData} />
           </div>
         )}
       </div>

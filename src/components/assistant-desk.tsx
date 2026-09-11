@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Bell, Check, Sparkles } from "lucide-react";
 import { C, GhostButton, PrimaryButton } from "@/components/ui";
 import { huddleBrief } from "@/lib/assistant-rules";
+import { enterDesk } from "@/lib/enter-desk";
 import { riskLabel } from "@/lib/kpis";
 import { mergeNotices, readLocalNotices, upsertLocalNotices } from "@/lib/notice-cache";
 import { fmtLakh } from "@/lib/format";
@@ -241,13 +242,8 @@ export function AssistantDesk({
   }
 
   async function openRm(id: string) {
-    await fetch("/api/demo/session", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ id }),
-    });
-    router.push("/rm");
-    router.refresh();
+    await enterDesk({ id });
+    router.replace("/rm");
   }
 
   return (

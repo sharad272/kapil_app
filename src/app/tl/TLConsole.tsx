@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
@@ -68,6 +68,7 @@ export default function TLConsole({
   mode: AppMode;
 }) {
   const router = useRouter();
+  const [, startTransition] = useTransition();
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const [tab, setTab] = useState<"dashboard" | "entry" | "certs" | "notes" | "assistant" | "team">("dashboard");
   const [ask, setAsk] = useState("");
@@ -122,7 +123,7 @@ export default function TLConsole({
     if (timers.current[id]) clearTimeout(timers.current[id]);
     timers.current[id] = setTimeout(() => {
       void work();
-    }, 450);
+    }, 280);
   }
 
   const rows = useMemo(() => {
@@ -186,7 +187,7 @@ export default function TLConsole({
 
   function askAssistant(query: string) {
     setAsk(query);
-    setTab("assistant");
+    startTransition(() => setTab("assistant"));
   }
 
   function saveAssignment(rmId: string, field: "target" | "quality_score", raw: string) {
@@ -398,7 +399,7 @@ export default function TLConsole({
           {NAV.map((n) => (
             <button
               key={n.id}
-              onClick={() => setTab(n.id)}
+              onClick={() => startTransition(() => setTab(n.id))}
               aria-label={n.label}
               className="desk-nav inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap px-3 py-3 text-sm font-medium transition-colors sm:px-3.5"
               style={{
@@ -416,7 +417,7 @@ export default function TLConsole({
       </div>
       </div>
 
-      <div className="mx-auto max-w-7xl space-y-4 p-3 safe-bottom sm:space-y-5 sm:p-5">
+      <div key={tab} className="desk-panel mx-auto max-w-7xl space-y-4 p-3 safe-bottom sm:space-y-5 sm:p-5">
         {tab === "dashboard" && (
           <BrandHero
             compact

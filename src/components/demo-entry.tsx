@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight, Search, Shield } from "lucide-react";
 import { Avatar, C } from "@/components/ui";
+import { enterDesk } from "@/lib/enter-desk";
 
 export type DeskPick = { id: string; full_name: string; email: string };
 
@@ -23,6 +24,11 @@ export function DemoEntry({
   const [busy, setBusy] = useState<string | null>(null);
   const [q, setQ] = useState("");
 
+  useEffect(() => {
+    router.prefetch("/tl");
+    router.prefetch("/rm");
+  }, [router]);
+
   const filtered = useMemo(() => {
     const n = q.trim().toLowerCase();
     if (!n) return rms;
@@ -31,13 +37,12 @@ export function DemoEntry({
 
   async function enter(id: string, href: "/tl" | "/rm") {
     setBusy(id);
-    await fetch("/api/demo/session", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ id }),
-    });
-    router.push(href);
-    router.refresh();
+    try {
+      await enterDesk({ id });
+      router.replace(href);
+    } catch {
+      setBusy(null);
+    }
   }
 
   return (
@@ -48,6 +53,7 @@ export function DemoEntry({
         </p>
         <button
           type="button"
+          onPointerEnter={() => router.prefetch("/tl")}
           onClick={() => void enter(teamLead.id, "/tl")}
           disabled={busy !== null}
           className="desk-person flex min-h-14 w-full items-center gap-3 rounded-xl px-3.5 py-3 text-left disabled:opacity-40"
@@ -90,6 +96,7 @@ export function DemoEntry({
                 <li key={rm.id}>
                   <button
                     type="button"
+                    onPointerEnter={() => router.prefetch("/rm")}
                     onClick={() => void enter(rm.id, "/rm")}
                     disabled={busy !== null}
                     className="desk-person flex min-h-14 w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-left disabled:opacity-40"
