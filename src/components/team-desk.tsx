@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Trash2, UserPlus } from "lucide-react";
 import { C, GhostButton, PrimaryButton } from "@/components/ui";
+import { timedFetch } from "@/lib/enter-desk";
 import { initials } from "@/lib/format";
 import type { Profile } from "@/lib/types";
 
@@ -25,11 +26,15 @@ export function TeamDesk({
     setBusy(true);
     setError("");
     try {
-      const res = await fetch("/api/team", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ full_name: name, email }),
-      });
+      const res = await timedFetch(
+        "/api/team",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ full_name: name, email }),
+        },
+        8000,
+      );
       const data = (await res.json()) as { rm?: Profile; error?: string };
       if (!res.ok || !data.rm) {
         setError(data.error || "Could not add that RM");
@@ -49,11 +54,15 @@ export function TeamDesk({
     setBusy(true);
     setError("");
     try {
-      const res = await fetch("/api/team", {
-        method: "DELETE",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ id }),
-      });
+      const res = await timedFetch(
+        "/api/team",
+        {
+          method: "DELETE",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ id }),
+        },
+        8000,
+      );
       const data = (await res.json()) as { error?: string };
       if (!res.ok) {
         setError(data.error || "Could not remove that RM");

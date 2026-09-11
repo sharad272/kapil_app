@@ -9,6 +9,7 @@ import { Inbox } from "@/components/inbox";
 import { C, EmptyState, NumInput, PrimaryButton, StatTile, TopBar } from "@/components/ui";
 import { achievementColor, fmtLakh, num, parseLoose, whenText } from "@/lib/format";
 import { hasSupabase } from "@/lib/theme";
+import { leaveDesk } from "@/lib/enter-desk";
 import { createClient } from "@/lib/supabase/client";
 import type { AppMode, Assignment, Certification, MonthRow, Profile, Submission } from "@/lib/types";
 
@@ -58,12 +59,14 @@ export default function RMWorkspace({
   }, [assignments]);
 
   async function signOut() {
-    await fetch("/api/demo/session", { method: "DELETE" });
     if (mode === "live" && hasSupabase()) {
-      await createClient().auth.signOut();
+      try {
+        await createClient().auth.signOut();
+      } catch {
+        /* still leave */
+      }
     }
-    router.push("/login");
-    router.refresh();
+    await leaveDesk();
   }
 
   function later(id: string, work: () => Promise<void>) {
@@ -167,7 +170,9 @@ export default function RMWorkspace({
     setSubs((s) => ({ ...s, [activeMonth]: next }));
     await persistSubmission(next);
     setStatus(on ? "Submitted" : "Reopened");
-    startTransition(() => router.refresh());
+    if (mode !== "demo") {
+      startTransition(() => router.refresh());
+    }
   }
 
   const chartData = months.map((m) => {

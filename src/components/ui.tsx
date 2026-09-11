@@ -2,6 +2,7 @@
 
 import React from "react";
 import type { LucideIcon } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { C } from "@/lib/theme";
 import { initials } from "@/lib/format";
 
@@ -209,6 +210,7 @@ export function TopBar({
   right,
   status,
   onSignOut,
+  onBack,
   sticky = true,
 }: {
   title: string;
@@ -216,6 +218,7 @@ export function TopBar({
   right?: React.ReactNode;
   status?: string;
   onSignOut: () => void;
+  onBack?: () => void;
   sticky?: boolean;
 }) {
   return (
@@ -228,10 +231,23 @@ export function TopBar({
       }}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="min-w-0">
-          <div className="serif text-lg font-semibold tracking-tight text-white sm:text-xl">{title}</div>
-          <div className="mt-0.5 text-xs" style={{ color: C.ice }}>
-            {subtitle}
+        <div className="flex min-w-0 items-start gap-2">
+          {onBack ? (
+            <button
+              type="button"
+              aria-label="Go back"
+              onClick={onBack}
+              className="desk-btn mt-0.5 inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg text-white sm:hidden"
+              style={{ background: C.navyDeep, border: `1px solid ${C.navyMid}` }}
+            >
+              <ChevronLeft size={20} />
+            </button>
+          ) : null}
+          <div className="min-w-0">
+            <div className="serif text-lg font-semibold tracking-tight text-white sm:text-xl">{title}</div>
+            <div className="mt-0.5 text-xs" style={{ color: C.ice }}>
+              {subtitle}
+            </div>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
@@ -260,7 +276,7 @@ export function TableScroll({ children }: { children: React.ReactNode }) {
       <p className="px-4 pb-1 text-[11px] sm:hidden" style={{ color: C.slateLight }}>
         Swipe sideways for the rest of the columns
       </p>
-      <div className="overflow-x-auto overscroll-x-contain [-webkit-overflow-scrolling:touch]">{children}</div>
+      <div data-no-swipe className="overflow-x-auto overscroll-x-contain [-webkit-overflow-scrolling:touch]">{children}</div>
     </div>
   );
 }

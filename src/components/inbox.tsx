@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Bell, Check } from "lucide-react";
 import { C, GhostButton, PrimaryButton } from "@/components/ui";
+import { timedFetch } from "@/lib/enter-desk";
 import { whenText } from "@/lib/format";
 import { mergeNotices, readLocalNotices, upsertLocalNotices } from "@/lib/notice-cache";
 import type { DeskNotice } from "@/lib/types";
@@ -16,7 +17,7 @@ export function Inbox({ rmId }: { rmId: string }) {
     const local = readLocalNotices().filter((n) => n.rm_id === rmId);
     setNotices(local);
     try {
-      const res = await fetch("/api/notifications");
+      const res = await timedFetch("/api/notifications", {}, 6000);
       const data = (await res.json()) as { notices?: DeskNotice[] };
       if (data.notices) {
         upsertLocalNotices(data.notices);
@@ -51,16 +52,22 @@ export function Inbox({ rmId }: { rmId: string }) {
       return next;
     });
     try {
-      const res = await fetch(`/api/notifications/${id}`, {
-        method: "PATCH",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ action }),
-      });
+      const res = await timedFetch(
+        `/api/notifications/${id}`,
+        {
+          method: "PATCH",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ action }),
+        },
+        6000,
+      );
       const data = (await res.json()) as { notice?: DeskNotice };
       if (data.notice) {
         upsertLocalNotices([data.notice]);
         setNotices((rows) => mergeNotices(rows, [data.notice!]).filter((n) => n.rm_id === rmId));
       }
+    } catch {
+      /* optimistic update already applied */
     } finally {
       setBusy(null);
     }

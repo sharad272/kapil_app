@@ -22,10 +22,10 @@ export default async function HowItWorksPage() {
         }}
       >
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3">
-          <Link href="/" className="serif min-h-11 inline-flex items-center text-sm font-semibold text-white">
+          <Link href="/" prefetch={false} className="serif min-h-11 inline-flex items-center text-sm font-semibold text-white">
             Team Victory
           </Link>
-          <Link href="/login" className="desk-btn min-h-11 inline-flex items-center rounded-lg px-3 text-xs" style={{ color: "#CADCFC", border: "1px solid #2A3470" }}>
+          <Link href="/login" prefetch={false} className="desk-btn min-h-11 inline-flex items-center rounded-lg px-3 text-xs" style={{ color: "#CADCFC", border: "1px solid #2A3470" }}>
             Sign in
           </Link>
         </div>

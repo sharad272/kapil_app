@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
@@ -33,6 +33,7 @@ import {
   pctChange,
 } from "@/lib/format";
 import { hasSupabase } from "@/lib/theme";
+import { leaveDesk, requestBack } from "@/lib/enter-desk";
 import { createClient } from "@/lib/supabase/client";
 import type {
   AppMode,
@@ -46,6 +47,7 @@ import type {
 
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const rowKey = (rm: string, m: string) => `${rm}|${m}`;
+type Tab = "dashboard" | "entry" | "certs" | "notes" | "assistant" | "team";
 
 export default function TLConsole({
   profile,
@@ -69,7 +71,7 @@ export default function TLConsole({
   const router = useRouter();
   const [, startTransition] = useTransition();
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
-  const [tab, setTab] = useState<"dashboard" | "entry" | "certs" | "notes" | "assistant" | "team">("dashboard");
+  const [tab, setTab] = useState<Tab>("dashboard");
   const [ask, setAsk] = useState("");
   const [team, setTeam] = useState(initialTeam);
   const [activeMonth, setActiveMonth] = useState(months.length ? months[months.length - 1].id : "");
@@ -112,11 +114,52 @@ export default function TLConsole({
   const closed = monthList.find((m) => m.id === activeMonth)?.is_open === false;
 
   async function signOut() {
-    await fetch("/api/demo/session", { method: "DELETE" });
-    if (mode === "live" && hasSupabase()) await createClient().auth.signOut();
-    router.push("/login");
-    router.refresh();
+    if (mode === "live" && hasSupabase()) {
+      try {
+        await createClient().auth.signOut();
+      } catch {
+        /* still leave */
+      }
+    }
+    await leaveDesk();
   }
+
+  const tabRef = useRef(tab);
+  tabRef.current = tab;
+
+  function openTab(id: Tab) {
+    if (id === tabRef.current) return;
+    startTransition(() => setTab(id));
+    if (id === "dashboard") {
+      window.history.replaceState({ ...window.history.state, deskTab: "dashboard" }, "");
+    } else {
+      window.history.pushState({ ...window.history.state, deskTab: id }, "");
+    }
+  }
+
+  useEffect(() => {
+    window.history.replaceState({ ...window.history.state, deskTab: "dashboard" }, "");
+    const onPop = (e: PopStateEvent) => {
+      const next = ((e.state as { deskTab?: Tab } | null)?.deskTab ?? "dashboard") as Tab;
+      startTransition(() => setTab(next));
+    };
+    const onBack = (e: Event) => {
+      if (tabRef.current === "dashboard") return;
+      e.preventDefault();
+      const st = window.history.state as { deskTab?: Tab } | null;
+      if (st?.deskTab && st.deskTab !== "dashboard") {
+        window.history.back();
+      } else {
+        openTab("dashboard");
+      }
+    };
+    window.addEventListener("popstate", onPop);
+    window.addEventListener("desk:back", onBack);
+    return () => {
+      window.removeEventListener("popstate", onPop);
+      window.removeEventListener("desk:back", onBack);
+    };
+  }, []);
 
   function later(id: string, work: () => Promise<void>) {
     if (timers.current[id]) clearTimeout(timers.current[id]);
@@ -186,7 +229,7 @@ export default function TLConsole({
 
   function askAssistant(query: string) {
     setAsk(query);
-    startTransition(() => setTab("assistant"));
+    openTab("assistant");
   }
 
   function saveAssignment(rmId: string, field: "target" | "quality_score", raw: string) {
@@ -370,6 +413,7 @@ export default function TLConsole({
         subtitle={`Cross Sell · ${team.length} relationship managers${mode === "demo" ? " · preview" : ""}`}
         status={status}
         onSignOut={signOut}
+        onBack={tab !== "dashboard" ? () => requestBack() : undefined}
         sticky={false}
         right={
           monthList.length > 0 ? (
@@ -391,11 +435,11 @@ export default function TLConsole({
       />
 
       <div className="px-3 sm:px-5" style={{ background: C.panel, borderBottom: `1px solid ${C.line}` }}>
-        <div className="no-scrollbar flex gap-1 overflow-x-auto">
+        <div data-no-swipe className="no-scrollbar flex gap-1 overflow-x-auto">
           {NAV.map((n) => (
             <button
               key={n.id}
-              onClick={() => startTransition(() => setTab(n.id))}
+              onClick={() => openTab(n.id)}
               aria-label={n.label}
               className="desk-nav inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap px-3 py-3 text-sm font-medium transition-colors sm:px-3.5"
               style={{

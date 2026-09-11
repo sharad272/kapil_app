@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight, Search, Shield } from "lucide-react";
 import { Avatar, C } from "@/components/ui";
-import { enterDesk } from "@/lib/enter-desk";
+import { enterDesk, hardOpen } from "@/lib/enter-desk";
 
 export type DeskPick = { id: string; full_name: string; email: string };
 
@@ -20,14 +19,14 @@ export function DemoEntry({
   teamLead: DeskPick;
   rms: DeskPick[];
 }) {
-  const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
   const [q, setQ] = useState("");
 
   useEffect(() => {
-    router.prefetch("/tl");
-    router.prefetch("/rm");
-  }, [router]);
+    const reset = () => setBusy(null);
+    window.addEventListener("pageshow", reset);
+    return () => window.removeEventListener("pageshow", reset);
+  }, []);
 
   const filtered = useMemo(() => {
     const n = q.trim().toLowerCase();
@@ -37,10 +36,12 @@ export function DemoEntry({
 
   async function enter(id: string, href: "/tl" | "/rm") {
     setBusy(id);
+    const watchdog = window.setTimeout(() => setBusy(null), 10000);
     try {
       await enterDesk({ id });
-      router.replace(href);
+      hardOpen(href);
     } catch {
+      window.clearTimeout(watchdog);
       setBusy(null);
     }
   }
@@ -53,7 +54,6 @@ export function DemoEntry({
         </p>
         <button
           type="button"
-          onPointerEnter={() => router.prefetch("/tl")}
           onClick={() => void enter(teamLead.id, "/tl")}
           disabled={busy !== null}
           className="desk-person flex min-h-14 w-full items-center gap-3 rounded-xl px-3.5 py-3 text-left disabled:opacity-40"
@@ -96,7 +96,6 @@ export function DemoEntry({
                 <li key={rm.id}>
                   <button
                     type="button"
-                    onPointerEnter={() => router.prefetch("/rm")}
                     onClick={() => void enter(rm.id, "/rm")}
                     disabled={busy !== null}
                     className="desk-person flex min-h-14 w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-left disabled:opacity-40"

@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Bell, Check, Sparkles } from "lucide-react";
 import { C, GhostButton, PrimaryButton } from "@/components/ui";
 import { huddleBrief } from "@/lib/assistant-rules";
-import { enterDesk } from "@/lib/enter-desk";
+import { enterDesk, hardOpen, timedFetch } from "@/lib/enter-desk";
 import { riskLabel } from "@/lib/kpis";
 import { mergeNotices, readLocalNotices, upsertLocalNotices } from "@/lib/notice-cache";
 import { fmtLakh } from "@/lib/format";
@@ -93,7 +92,6 @@ export function AssistantDesk({
   monthLabel: string;
   initialQuery?: string;
 }) {
-  const router = useRouter();
   const [query, setQuery] = useState(initialQuery ?? "");
   const [busy, setBusy] = useState(false);
   const [sending, setSending] = useState(false);
@@ -108,7 +106,7 @@ export function AssistantDesk({
   const [status, setStatus] = useState("");
 
   useEffect(() => {
-    void fetch("/api/assistant")
+    void timedFetch("/api/assistant", {}, 6000)
       .then((r) => r.json())
       .then((data: { enabled?: boolean; provider?: "huggingface" | "groq" | "rules" }) => {
         setLink(data.provider ?? (data.enabled ? "huggingface" : "rules"));
@@ -123,11 +121,15 @@ export function AssistantDesk({
       setBusy(true);
       setError("");
       try {
-        const res = await fetch("/api/assistant", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ query: initialQuery, monthId }),
-        });
+        const res = await timedFetch(
+          "/api/assistant",
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ query: initialQuery, monthId }),
+          },
+          18000,
+        );
         const data = (await res.json()) as AssistantResult & { error?: string };
         if (!res.ok) {
           setError(data.error || "Could not filter the book");
@@ -153,7 +155,7 @@ export function AssistantDesk({
 
   useEffect(() => {
     setSent(readLocalNotices());
-    void fetch("/api/notifications")
+    void timedFetch("/api/notifications", {}, 6000)
       .then((r) => r.json())
       .then((data: { notices?: DeskNotice[] }) => {
         if (data.notices) {
@@ -173,11 +175,15 @@ export function AssistantDesk({
     setError("");
     setStatus("");
     try {
-      const res = await fetch("/api/assistant", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ query: q, monthId }),
-      });
+      const res = await timedFetch(
+        "/api/assistant",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ query: q, monthId }),
+        },
+        18000,
+      );
       const data = (await res.json()) as AssistantResult & { error?: string };
       if (!res.ok) {
         setError(data.error || "Could not filter the book");
@@ -211,20 +217,24 @@ export function AssistantDesk({
         reasons[m.id] = m.reason;
         per[m.id] = messages[m.id] || m.message;
       });
-      const res = await fetch("/api/notifications", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          rmIds: picked.map((m) => m.id),
-          title: title || `Check-in · ${monthLabel}`,
-          body: picked[0] ? messages[picked[0].id] || picked[0].message : "",
-          query,
-          reasons,
-          messages: per,
-          priority,
-          monthId,
-        }),
-      });
+      const res = await timedFetch(
+        "/api/notifications",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            rmIds: picked.map((m) => m.id),
+            title: title || `Check-in · ${monthLabel}`,
+            body: picked[0] ? messages[picked[0].id] || picked[0].message : "",
+            query,
+            reasons,
+            messages: per,
+            priority,
+            monthId,
+          }),
+        },
+        8000,
+      );
       const data = (await res.json()) as { notices?: DeskNotice[]; error?: string };
       if (!res.ok) {
         setError(data.error || "Could not send");
@@ -242,8 +252,12 @@ export function AssistantDesk({
   }
 
   async function openRm(id: string) {
-    await enterDesk({ id });
-    router.replace("/rm");
+    try {
+      await enterDesk({ id });
+      hardOpen("/rm");
+    } catch {
+      setError("Could not open that desk — try again");
+    }
   }
 
   return (

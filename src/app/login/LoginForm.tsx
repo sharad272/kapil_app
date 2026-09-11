@@ -149,7 +149,7 @@ export default function LoginForm({
             <ShieldAlert size={16} style={{ color: C.amber }} className="mt-0.5 shrink-0" />
             <div className="text-xs leading-5" style={{ color: C.ink }}>
               Relationship managers see only their own figures. Team leads see the whole team.{" "}
-              <Link href="/how-it-works" className="underline">
+              <Link href="/how-it-works" prefetch={false} className="underline">
                 How access works
               </Link>
             </div>

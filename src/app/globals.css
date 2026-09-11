@@ -8,6 +8,7 @@
   --gold: #c9a24b;
   --line: #e2e6f2;
   --slate: #5b6484;
+  --swipe-dx: 0px;
 }
 
 html,
@@ -15,6 +16,7 @@ body {
   background: var(--paper);
   color: var(--ink);
   overflow-x: hidden;
+  overscroll-behavior-x: none;
 }
 
 body {
@@ -147,6 +149,12 @@ textarea {
 
 .desk-panel {
   animation: desk-in 0.14s ease-out;
+}
+
+@media (pointer: coarse) {
+  .desk-panel {
+    animation: none;
+  }
 }
 
 @keyframes desk-in {

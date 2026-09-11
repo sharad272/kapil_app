@@ -40,7 +40,7 @@ export async function Landing() {
               Cross Sell
             </p>
           </div>
-          <Link href="/how-it-works" className="desk-btn min-h-11 inline-flex items-center rounded-lg px-3 text-xs" style={{ color: "#CADCFC", border: "1px solid #2A3470" }}>
+          <Link href="/how-it-works" prefetch={false} className="desk-btn min-h-11 inline-flex items-center rounded-lg px-3 text-xs" style={{ color: "#CADCFC", border: "1px solid #2A3470" }}>
             How access works
           </Link>
         </div>
