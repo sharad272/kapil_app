@@ -3,9 +3,9 @@ import {
   DEMO_CERTS,
   DEMO_MONTHS,
   DEMO_NOTES,
-  DEMO_RMS,
   DEMO_SUBMISSIONS,
 } from "@/lib/demo-data";
+import { listTeam } from "@/lib/roster";
 import { createClient } from "@/lib/supabase/server";
 import type { Assignment, Certification, CoachingNote, MonthRow, Profile, RMPayload, Session, Submission, TLPayload } from "@/lib/types";
 
@@ -46,7 +46,7 @@ export async function loadTL(session: Session): Promise<TLPayload> {
   if (session.mode === "demo") {
     return {
       profile: session.profile,
-      team: DEMO_RMS,
+      team: listTeam(),
       months: DEMO_MONTHS,
       submissions: DEMO_SUBMISSIONS,
       assignments: DEMO_ASSIGNMENTS,

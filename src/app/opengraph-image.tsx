@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "RM Productivity Portal";
+export const alt = "Team Victory — Cross Sell";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -19,12 +19,10 @@ export default function OpenGraphImage() {
           padding: 72,
         }}
       >
-        <div style={{ fontSize: 22, letterSpacing: 4, color: "#C9A24B" }}>RM PRODUCTIVITY PORTAL</div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <div style={{ fontSize: 64, lineHeight: 1.05, maxWidth: 900 }}>
-            APE, FRP and quality — without RMs seeing each other.
-          </div>
-          <div style={{ fontSize: 22, color: "#CADCFC" }}>Row-level security · team lead console · Vercel</div>
+        <div style={{ fontSize: 20, letterSpacing: 6, color: "#C9A24B" }}>KAPIL SHARMA · PRODUCTION DESK</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ fontSize: 84, lineHeight: 0.9, fontWeight: 600 }}>Team Victory</div>
+          <div style={{ fontSize: 64, lineHeight: 0.9, color: "#C9A24B", fontWeight: 500 }}>Cross Sell</div>
         </div>
       </div>
     ),

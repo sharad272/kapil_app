@@ -1,23 +1,196 @@
 @import "tailwindcss";
 
 :root {
-  --paper: #f7f8fc;
+  --paper: #f4f5fa;
   --ink: #1b1f3b;
   --navy: #1e2761;
+  --navy-deep: #10153a;
+  --gold: #c9a24b;
+  --line: #e2e6f2;
+  --slate: #5b6484;
+  --shadow: 0 12px 40px rgba(16, 21, 58, 0.08);
+  --shadow-hover: 0 16px 44px rgba(16, 21, 58, 0.14);
 }
 
 html,
 body {
   background: var(--paper);
   color: var(--ink);
+  overflow-x: hidden;
 }
 
 body {
-  min-height: 100%;
+  min-height: 100dvh;
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+::selection {
+  background: #cadcfc;
+  color: var(--navy-deep);
 }
 
 .tabular {
   font-variant-numeric: tabular-nums;
+}
+
+.serif {
+  font-family: var(--font-serif), ui-serif, Georgia, serif;
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+  touch-action: manipulation;
+}
+
+input,
+select,
+textarea {
+  font-size: 16px;
+}
+
+@media (min-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: inherit;
+  }
+}
+
+.safe-bottom {
+  padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.desk-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+  box-shadow: 0 1px 0 rgba(16, 21, 58, 0.03);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.desk-card-hover:hover {
+  transform: translateY(-2px);
+  border-color: #cfd5e8;
+  box-shadow: var(--shadow);
+}
+
+.desk-btn {
+  transition:
+    transform 0.15s ease,
+    filter 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.desk-btn:hover:not(:disabled) {
+  filter: brightness(1.08);
+  box-shadow: 0 8px 18px rgba(16, 21, 58, 0.18);
+}
+
+.desk-btn:active:not(:disabled) {
+  transform: translateY(1px) scale(0.985);
+}
+
+.desk-input {
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.desk-input:focus {
+  border-color: #8ea2e0 !important;
+  box-shadow: 0 0 0 3px rgba(30, 39, 97, 0.12);
+}
+
+.desk-row {
+  transition: background-color 0.15s ease;
+}
+
+.desk-row:hover {
+  background: #eef1f8 !important;
+}
+
+.desk-chip {
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.desk-chip:hover:not(:disabled) {
+  background: #fff !important;
+  border-color: var(--navy) !important;
+  color: var(--navy) !important;
+  transform: translateY(-1px);
+}
+
+.desk-person {
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background-color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.desk-person:hover:not(:disabled) {
+  border-color: var(--navy) !important;
+  box-shadow: 0 10px 24px rgba(30, 39, 97, 0.1);
+  transform: translateY(-1px);
+}
+
+.desk-person:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.desk-nav:hover {
+  color: var(--navy) !important;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.hero-grid {
+  background-image:
+    linear-gradient(135deg, rgba(201, 162, 75, 0.12) 0%, transparent 42%),
+    radial-gradient(circle at 88% 12%, rgba(202, 220, 252, 0.18), transparent 32%),
+    linear-gradient(160deg, #10153a 0%, #1e2761 52%, #2a3470 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desk-card,
+  .desk-btn,
+  .desk-input,
+  .desk-row,
+  .desk-chip,
+  .desk-person {
+    transition: none;
+  }
+
+  .desk-card-hover:hover,
+  .desk-person:hover:not(:disabled),
+  .desk-chip:hover:not(:disabled) {
+    transform: none;
+  }
 }

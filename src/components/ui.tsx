@@ -3,8 +3,34 @@
 import React from "react";
 import type { LucideIcon } from "lucide-react";
 import { C } from "@/lib/theme";
+import { initials } from "@/lib/format";
 
 export { C };
+
+export function Avatar({
+  name,
+  gold = false,
+  size = 36,
+}: {
+  name: string;
+  gold?: boolean;
+  size?: number;
+}) {
+  return (
+    <span
+      className="inline-flex shrink-0 items-center justify-center rounded-full text-xs font-semibold tracking-wide"
+      style={{
+        width: size,
+        height: size,
+        background: gold ? C.gold : C.navy,
+        color: gold ? C.navyDeep : "#fff",
+        fontSize: size < 32 ? 10 : 12,
+      }}
+    >
+      {initials(name)}
+    </span>
+  );
+}
 
 export function Delta({ value, points = false }: { value: number | null; points?: boolean }) {
   if (value === null) {
@@ -39,11 +65,13 @@ export function StatTile({
   valueColor?: string;
 }) {
   return (
-    <div className="min-w-[160px] flex-1 rounded-lg px-4 py-3" style={{ background: C.panel, border: `1px solid ${C.line}` }}>
-      <div className="mb-1 text-xs" style={{ color: C.slate }}>
+    <div
+      className="desk-card desk-card-hover min-w-0 flex-[1_1_calc(50%-0.375rem)] px-3 py-3.5 sm:min-w-[160px] sm:flex-1 sm:px-4"
+    >
+      <div className="mb-1 text-[11px] font-medium uppercase tracking-[0.14em]" style={{ color: C.slate }}>
         {label}
       </div>
-      <div className="text-2xl font-semibold leading-tight tabular-nums" style={{ color: valueColor || C.navy }}>
+      <div className="text-xl font-semibold leading-tight tabular-nums sm:text-2xl" style={{ color: valueColor || C.navy }}>
         {value}
       </div>
       <div className="mt-1 flex flex-wrap items-baseline gap-2">
@@ -77,7 +105,7 @@ export function NumInput({
       value={value === null || value === undefined ? "" : String(value)}
       placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full rounded px-2 py-1 text-right text-sm tabular-nums outline-none disabled:opacity-60"
+      className="desk-input w-full rounded-lg px-2 py-2 text-right text-base tabular-nums outline-none disabled:opacity-60 sm:py-1.5 sm:text-sm"
       style={{
         border: `1px solid ${C.line}`,
         color: C.ink,
@@ -94,6 +122,7 @@ export function PrimaryButton({
   tone = "navy",
   disabled,
   type = "button",
+  block = false,
 }: {
   children: React.ReactNode;
   onClick?: () => void;
@@ -101,6 +130,7 @@ export function PrimaryButton({
   tone?: "navy" | "gold" | "green";
   disabled?: boolean;
   type?: "button" | "submit";
+  block?: boolean;
 }) {
   const bg = tone === "gold" ? C.gold : tone === "green" ? C.green : C.navy;
   return (
@@ -108,7 +138,7 @@ export function PrimaryButton({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className="inline-flex items-center gap-2 rounded-md px-3.5 py-2 text-sm font-medium disabled:opacity-40"
+      className={`desk-btn inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium disabled:opacity-40 ${block ? "w-full" : ""}`}
       style={{ background: bg, color: tone === "gold" ? C.navyDeep : "#fff" }}
     >
       {Icon ? <Icon size={15} /> : null}
@@ -122,17 +152,20 @@ export function GhostButton({
   onClick,
   icon: Icon,
   danger,
+  disabled,
 }: {
   children: React.ReactNode;
   onClick?: () => void;
   icon?: LucideIcon;
   danger?: boolean;
+  disabled?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium"
+      disabled={disabled}
+      className="desk-btn inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium disabled:opacity-40"
       style={{
         border: `1px solid ${danger ? "#F0C4B8" : C.line}`,
         color: danger ? C.red : C.ink,
@@ -157,7 +190,7 @@ export function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="rounded-lg px-6 py-14 text-center" style={{ background: C.panel, border: `1px dashed ${C.line}` }}>
+    <div className="desk-card px-6 py-14 text-center">
       <Icon size={28} style={{ color: C.slateLight }} className="mx-auto mb-3" />
       <div className="mb-1 text-base font-semibold" style={{ color: C.ink }}>
         {title}
@@ -176,23 +209,32 @@ export function TopBar({
   right,
   status,
   onSignOut,
+  sticky = true,
 }: {
   title: string;
   subtitle: string;
   right?: React.ReactNode;
   status?: string;
   onSignOut: () => void;
+  sticky?: boolean;
 }) {
   return (
-    <div className="px-5 py-4" style={{ background: C.navy }}>
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <div className="text-lg font-semibold text-white">{title}</div>
+    <div
+      className={`${sticky ? "sticky top-0 z-30" : ""} px-4 py-3 sm:px-5 sm:py-4`}
+      style={{
+        background: `linear-gradient(180deg, ${C.navyDeep} 0%, ${C.navy} 100%)`,
+        paddingTop: "max(0.75rem, env(safe-area-inset-top))",
+        borderBottom: `2px solid ${C.gold}`,
+      }}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className="serif text-lg font-semibold tracking-tight text-white sm:text-xl">{title}</div>
           <div className="mt-0.5 text-xs" style={{ color: C.ice }}>
             {subtitle}
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {status ? (
             <span className="text-xs" style={{ color: C.ice }}>
               {status}
@@ -201,13 +243,24 @@ export function TopBar({
           {right}
           <button
             onClick={onSignOut}
-            className="rounded-md px-2.5 py-1.5 text-xs font-medium text-white"
+            className="desk-btn min-h-11 rounded-lg px-3 py-1.5 text-xs font-medium text-white"
             style={{ background: C.navyDeep, border: `1px solid ${C.navyMid}` }}
           >
             Sign out
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+export function TableScroll({ children }: { children: React.ReactNode }) {
+  return (
+    <div>
+      <p className="px-4 pb-1 text-[11px] sm:hidden" style={{ color: C.slateLight }}>
+        Swipe sideways for the rest of the columns
+      </p>
+      <div className="overflow-x-auto overscroll-x-contain [-webkit-overflow-scrolling:touch]">{children}</div>
     </div>
   );
 }

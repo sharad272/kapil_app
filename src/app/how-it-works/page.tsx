@@ -12,22 +12,29 @@ export default async function HowItWorksPage() {
   cacheLife("days");
 
   return (
-    <div className="min-h-screen" style={{ background: "#F7F8FC" }}>
-      <header className="px-6 py-5" style={{ background: "#1E2761" }}>
-        <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <Link href="/" className="text-sm font-semibold text-white">
-            RM Productivity Portal
+    <div className="min-h-dvh" style={{ background: "#F7F8FC" }}>
+      <header
+        className="px-4 py-4 sm:px-6 sm:py-5"
+        style={{
+          background: "linear-gradient(180deg, #10153A 0%, #1E2761 100%)",
+          paddingTop: "max(1rem, env(safe-area-inset-top))",
+          borderBottom: "2px solid #C9A24B",
+        }}
+      >
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3">
+          <Link href="/" className="serif min-h-11 inline-flex items-center text-sm font-semibold text-white">
+            Team Victory
           </Link>
-          <Link href="/login" className="text-xs" style={{ color: "#CADCFC" }}>
+          <Link href="/login" className="desk-btn min-h-11 inline-flex items-center rounded-lg px-3 text-xs" style={{ color: "#CADCFC", border: "1px solid #2A3470" }}>
             Sign in
           </Link>
         </div>
       </header>
-      <article className="mx-auto max-w-5xl px-6 py-14">
+      <article className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
         <p className="text-xs font-medium uppercase tracking-[0.18em]" style={{ color: "#C9A24B" }}>
           For a reviewer who already knows this stack
         </p>
-        <h1 className="mt-3 max-w-3xl text-4xl font-semibold leading-tight" style={{ color: "#1B1F3B" }}>
+        <h1 className="serif mt-3 max-w-3xl text-3xl font-semibold leading-tight sm:text-4xl" style={{ color: "#1B1F3B" }}>
           The catalog of figures is cheap. Another RM&apos;s row is not yours.
         </h1>
         <p className="mt-5 max-w-2xl text-sm leading-7" style={{ color: "#5B6484" }}>
@@ -36,7 +43,7 @@ export default async function HowItWorksPage() {
           typing at month-end is not a row of single-character upserts.
         </p>
 
-        <div className="mt-10 overflow-x-auto">
+        <div className="desk-card mt-10 overflow-x-auto px-4">
           <table className="w-full min-w-[640px] border-collapse text-left text-sm">
             <thead>
               <tr className="text-xs uppercase tracking-[0.14em]" style={{ color: "#5B6484" }}>
@@ -57,12 +64,13 @@ export default async function HowItWorksPage() {
               <Row k="Targets, quality scores" rm="read own only" tl="read + write all" />
               <Row k="Own certification scores" rm="read + write" tl="read + correct" />
               <Row k="Coaching notes" rm="no access" tl="read + write" />
+              <Row k="In-app notices" rm="own inbox + acknowledge" tl="filter + send" />
             </tbody>
           </table>
         </div>
 
         <section className="mt-12 grid gap-8 lg:grid-cols-2">
-          <div>
+          <div className="desk-card p-6">
             <h2 className="text-xl font-semibold" style={{ color: "#1B1F3B" }}>
               Under load
             </h2>
@@ -85,7 +93,7 @@ export default async function HowItWorksPage() {
               </li>
             </ul>
           </div>
-          <div>
+          <div className="desk-card p-6">
             <h2 className="text-xl font-semibold" style={{ color: "#1B1F3B" }}>
               Production swap
             </h2>

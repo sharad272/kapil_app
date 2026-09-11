@@ -1,18 +1,30 @@
 import { NextResponse } from "next/server";
 import { DEMO_COOKIE } from "@/lib/theme";
-import { DEMO_RMS, DEMO_TL } from "@/lib/demo-data";
+import { DEMO_TL } from "@/lib/demo-data";
+import { findRm, listTeam } from "@/lib/roster";
 
 export async function POST(request: Request) {
-  let role: "tl" | "rm" = "rm";
+  let id = DEMO_TL.id;
   try {
-    const body = (await request.json()) as { role?: string };
-    if (body.role === "tl") role = "tl";
+    const body = (await request.json()) as { role?: string; id?: string };
+    if (body.id === DEMO_TL.id || body.id === "tl" || body.role === "tl") {
+      id = DEMO_TL.id;
+    } else if (body.id && findRm(body.id)) {
+      id = body.id;
+    } else {
+      const first = listTeam()[0];
+      if (!first) {
+        return NextResponse.json({ error: "No relationship managers on the book" }, { status: 400 });
+      }
+      id = first.id;
+    }
   } catch {
-    role = "rm";
+    const first = listTeam()[0];
+    id = first?.id ?? DEMO_TL.id;
   }
 
-  const id = role === "tl" ? DEMO_TL.id : DEMO_RMS[0].id;
-  const response = NextResponse.json({ ok: true, role, id });
+  const profile = id === DEMO_TL.id ? DEMO_TL : findRm(id);
+  const response = NextResponse.json({ ok: true, role: profile?.role ?? "rm", id });
   response.cookies.set(DEMO_COOKIE, id, {
     httpOnly: true,
     sameSite: "lax",

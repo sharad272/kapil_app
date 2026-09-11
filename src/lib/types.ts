@@ -69,3 +69,58 @@ export interface TLPayload {
   notes: CoachingNote[];
   mode: AppMode;
 }
+
+export type NoticePriority = "normal" | "high";
+
+export interface DeskNotice {
+  id: string;
+  rm_id: string;
+  rm_name: string;
+  from_id: string;
+  from_name: string;
+  title: string;
+  body: string;
+  query: string;
+  reason: string;
+  priority: NoticePriority;
+  month_id: string;
+  created_at: string;
+  read_at: string | null;
+  ack_at: string | null;
+}
+
+export interface RmKpi {
+  id: string;
+  name: string;
+  email: string;
+  month: string;
+  ape: number;
+  frp: number;
+  policies: number;
+  target: number;
+  achievementPct: number | null;
+  quality: number | null;
+  momPct: number | null;
+  submitted: boolean;
+  ulip: number | null;
+  endowment: number | null;
+  term: number | null;
+  certAvg: number | null;
+  flags: string[];
+}
+
+export interface AssistantMatch {
+  id: string;
+  name: string;
+  email: string;
+  reason: string;
+  message: string;
+  kpis: RmKpi;
+}
+
+export interface AssistantResult {
+  interpretation: string;
+  brief: string;
+  source: "huggingface" | "groq" | "rules";
+  matches: AssistantMatch[];
+}

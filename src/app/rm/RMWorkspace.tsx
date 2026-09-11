@@ -13,6 +13,9 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { BrandHero } from "@/components/brand-hero";
+import { DemoSwitcher } from "@/components/demo-switcher";
+import { Inbox } from "@/components/inbox";
 import { C, EmptyState, NumInput, PrimaryButton, StatTile, TopBar } from "@/components/ui";
 import { achievementColor, fmtLakh, num, parseLoose, whenText } from "@/lib/format";
 import { hasSupabase } from "@/lib/theme";
@@ -97,8 +100,11 @@ export default function RMWorkspace({
           title={`Hello, ${profile.full_name.split(" ")[0]}`}
           subtitle="Submit your monthly figures"
           onSignOut={signOut}
+          right={mode === "demo" ? <DemoSwitcher currentId={profile.id} /> : undefined}
         />
-        <div className="mx-auto max-w-4xl p-5">
+        <div className="mx-auto max-w-4xl space-y-4 p-3 safe-bottom sm:p-5">
+          <BrandHero compact kicker="Home" sub={`Your figures · ${profile.full_name}`} />
+          <Inbox rmId={profile.id} />
           <EmptyState
             icon={Clock}
             title="No reporting month is open yet"
@@ -121,7 +127,15 @@ export default function RMWorkspace({
   const target = assign?.target ?? null;
   const quality = assign?.quality_score ?? null;
   const achievement = target ? (num(cur.ape) / num(target)) * 100 : null;
+  const remaining = target ? num(target) - num(cur.ape) : null;
   const closed = months.find((m) => m.id === activeMonth)?.is_open === false;
+  const weakCerts = (
+    [
+      { label: "ULIP", v: certs.ulip },
+      { label: "Endowment", v: certs.endowment },
+      { label: "Term", v: certs.term },
+    ] as const
+  ).filter((c) => c.v !== null && c.v !== undefined && c.v < 70);
 
   function saveField(field: "ape" | "frp" | "policies", raw: string) {
     const value = parseLoose(raw);
@@ -179,33 +193,42 @@ export default function RMWorkspace({
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-dvh">
       <TopBar
         title={`Hello, ${profile.full_name.split(" ")[0]}`}
         subtitle="Submit your monthly figures and keep your certification scores current"
         status={status}
         onSignOut={signOut}
         right={
-          <select
-            value={activeMonth}
-            onChange={(e) => setActiveMonth(e.target.value)}
-            className="rounded-md px-3 py-1.5 text-sm font-medium text-white outline-none"
-            style={{ background: C.navyDeep, border: `1px solid ${C.navyMid}` }}
-          >
-            {months.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.label}
-                {m.is_open ? "" : " · closed"}
-              </option>
-            ))}
-          </select>
+          <>
+            {mode === "demo" ? <DemoSwitcher currentId={profile.id} /> : null}
+            <select
+              value={activeMonth}
+              onChange={(e) => setActiveMonth(e.target.value)}
+              className="desk-btn min-h-11 rounded-lg px-3 py-1.5 text-sm font-medium text-white outline-none"
+              style={{ background: C.navyDeep, border: `1px solid ${C.navyMid}` }}
+            >
+              {months.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.label}
+                  {m.is_open ? "" : " · closed"}
+                </option>
+              ))}
+            </select>
+          </>
         }
       />
 
-      <div className="mx-auto max-w-4xl space-y-4 p-5">
+      <div className="mx-auto max-w-4xl space-y-4 p-3 safe-bottom sm:p-5">
+        <BrandHero
+          compact
+          kicker="Home"
+          sub={`${months.find((m) => m.id === activeMonth)?.label ?? "Your desk"} · ${profile.full_name}`}
+        />
+        <Inbox rmId={profile.id} />
         {mode === "demo" && (
           <div className="rounded-lg px-4 py-3 text-xs" style={{ background: C.amberBg, color: C.ink }}>
-            Preview as Aarav Sharma. Writes stay on this device until Supabase is connected.
+            Preview as {profile.full_name}. Writes stay on this device until Supabase is connected.
           </div>
         )}
         {closed && (
@@ -244,10 +267,16 @@ export default function RMWorkspace({
             value={achievement === null ? "—" : `${achievement.toFixed(0)}%`}
             valueColor={achievementColor(achievement)}
           />
+          <StatTile
+            label="Still to go"
+            value={remaining === null ? "—" : remaining <= 0 ? "over target" : fmtLakh(remaining)}
+            sub={remaining !== null && remaining > 0 ? "APE vs your target" : undefined}
+            valueColor={remaining !== null && remaining > 0 ? C.amber : C.green}
+          />
           <StatTile label="Quality score" value={quality === null ? "—" : quality} sub="assigned by your team lead" />
         </div>
 
-        <div className="overflow-hidden rounded-lg" style={{ background: C.panel, border: `1px solid ${C.line}` }}>
+        <div className="desk-card overflow-hidden">
           <div className="px-4 py-3" style={{ borderBottom: `1px solid ${C.line}` }}>
             <div className="text-sm font-semibold" style={{ color: C.ink }}>
               Your figures
@@ -292,7 +321,7 @@ export default function RMWorkspace({
           </div>
         </div>
 
-        <div className="rounded-lg p-4" style={{ background: C.panel, border: `1px solid ${C.line}` }}>
+        <div className="desk-card p-4">
           <div className="mb-1 text-sm font-semibold" style={{ color: C.ink }}>
             Your certification scores
           </div>
@@ -314,8 +343,18 @@ export default function RMWorkspace({
           </div>
         </div>
 
+        {weakCerts.length > 0 && (
+          <div className="flex items-start gap-3 rounded-lg px-4 py-3" style={{ background: C.amberBg, color: C.ink }}>
+            <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+            <div className="text-xs">
+              {weakCerts.map((c) => c.label).join(" and ")} {weakCerts.length === 1 ? "is" : "are"} below 70. Update
+              after you re-sit so your team lead isn&apos;t working off a stale score.
+            </div>
+          </div>
+        )}
+
         {chartData.some((d) => d.APE > 0) && (
-          <div className="rounded-lg p-4" style={{ background: C.panel, border: `1px solid ${C.line}` }}>
+          <div className="desk-card p-4">
             <div className="mb-3 text-sm font-semibold" style={{ color: C.ink }}>
               Your months so far, in ₹ lakh
             </div>

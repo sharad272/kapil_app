@@ -11,11 +11,17 @@ import {
   LayoutDashboard,
   NotebookPen,
   Plus,
+  Sparkles,
   Table2,
   Target,
   Users,
 } from "lucide-react";
-import { C, EmptyState, GhostButton, NumInput, PrimaryButton, StatTile, TopBar } from "@/components/ui";
+import { AssistantDesk, RiskBoard } from "@/components/assistant-desk";
+import { BrandHero } from "@/components/brand-hero";
+import { DemoSwitcher } from "@/components/demo-switcher";
+import { TeamDesk } from "@/components/team-desk";
+import { C, EmptyState, GhostButton, NumInput, PrimaryButton, StatTile, TableScroll, TopBar } from "@/components/ui";
+import { buildKpis, riskLabel } from "@/lib/kpis";
 import {
   achievementColor,
   fmtCr,
@@ -44,7 +50,7 @@ const rowKey = (rm: string, m: string) => `${rm}|${m}`;
 
 export default function TLConsole({
   profile,
-  team,
+  team: initialTeam,
   months,
   initialSubmissions,
   initialAssignments,
@@ -63,7 +69,9 @@ export default function TLConsole({
 }) {
   const router = useRouter();
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
-  const [tab, setTab] = useState<"dashboard" | "entry" | "certs" | "notes">("dashboard");
+  const [tab, setTab] = useState<"dashboard" | "entry" | "certs" | "notes" | "assistant" | "team">("dashboard");
+  const [ask, setAsk] = useState("");
+  const [team, setTeam] = useState(initialTeam);
   const [activeMonth, setActiveMonth] = useState(months.length ? months[months.length - 1].id : "");
   const [status, setStatus] = useState("");
   const [flatTarget, setFlatTarget] = useState("");
@@ -161,6 +169,25 @@ export default function TLConsole({
   const pending = rows.filter((r) => !r.submitted);
   const anyTargets = rows.some((r) => r.target > 0);
   const teamAch = totals.target ? (totals.ape / totals.target) * 100 : null;
+
+  const kpiRows = useMemo(
+    () =>
+      buildKpis({
+        team,
+        months: monthList,
+        submissions: Object.values(subs),
+        assignments: Object.values(assigns),
+        certs: Object.values(certMap),
+        monthId: activeMonth,
+      }),
+    [team, monthList, subs, assigns, certMap, activeMonth],
+  );
+  const flagMap = useMemo(() => new Map(kpiRows.map((k) => [k.id, k.flags])), [kpiRows]);
+
+  function askAssistant(query: string) {
+    setAsk(query);
+    setTab("assistant");
+  }
 
   function saveAssignment(rmId: string, field: "target" | "quality_score", raw: string) {
     const value = parseLoose(raw);
@@ -295,7 +322,7 @@ export default function TLConsole({
   }
 
   function exportCSV() {
-    const lines = [["RM", "Month", "Target", "APE", "FRP", "Policies", "Quality", "Submitted"].join(",")];
+    const lines = [["RM", "Month", "Target", "APE", "FRP", "Policies", "Quality", "Achieved %", "Submitted"].join(",")];
     team.forEach((r) =>
       monthList.forEach((m) => {
         const s = subs[rowKey(r.id, m.id)];
@@ -309,6 +336,7 @@ export default function TLConsole({
             s?.frp ?? "",
             s?.policies ?? "",
             a?.quality_score ?? "",
+            num(a?.target) ? ((num(s?.ape) / num(a?.target)) * 100).toFixed(0) : "",
             s?.submitted_at ?? "",
           ].join(","),
         );
@@ -326,62 +354,80 @@ export default function TLConsole({
   }
 
   const NAV = [
-    { id: "dashboard" as const, label: "Dashboard", icon: LayoutDashboard },
-    { id: "entry" as const, label: "Targets & figures", icon: Table2 },
-    { id: "certs" as const, label: "Certifications", icon: GraduationCap },
-    { id: "notes" as const, label: "Coaching notes", icon: NotebookPen },
+    { id: "dashboard" as const, label: "Dashboard", short: "Home", icon: LayoutDashboard },
+    { id: "team" as const, label: "Team", short: "Team", icon: Users },
+    { id: "assistant" as const, label: "Assistant", short: "AI", icon: Sparkles },
+    { id: "entry" as const, label: "Targets & figures", short: "Figures", icon: Table2 },
+    { id: "certs" as const, label: "Certifications", short: "Certs", icon: GraduationCap },
+    { id: "notes" as const, label: "Coaching notes", short: "Notes", icon: NotebookPen },
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-dvh">
+      <div className="sticky top-0 z-30">
       <TopBar
-        title="Team lead console"
-        subtitle={`${team.length} relationship managers${mode === "demo" ? " · preview" : ""}`}
+        title="Team Victory"
+        subtitle={`Cross Sell · ${team.length} relationship managers${mode === "demo" ? " · preview" : ""}`}
         status={status}
         onSignOut={signOut}
+        sticky={false}
         right={
-          monthList.length > 0 && (
-            <select
-              value={activeMonth}
-              onChange={(e) => setActiveMonth(e.target.value)}
-              className="rounded-md px-3 py-1.5 text-sm font-medium text-white outline-none"
-              style={{ background: C.navyDeep, border: `1px solid ${C.navyMid}` }}
-            >
-              {monthList.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.label}
-                  {m.is_open ? "" : " · closed"}
-                </option>
-              ))}
-            </select>
-          )
+          <>
+            {mode === "demo" ? <DemoSwitcher currentId={profile.id} /> : null}
+            {monthList.length > 0 && (
+              <select
+                value={activeMonth}
+                onChange={(e) => setActiveMonth(e.target.value)}
+                className="desk-btn min-h-11 rounded-lg px-3 py-1.5 text-sm font-medium text-white outline-none"
+                style={{ background: C.navyDeep, border: `1px solid ${C.navyMid}` }}
+              >
+                {monthList.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.label}
+                    {m.is_open ? "" : " · closed"}
+                  </option>
+                ))}
+              </select>
+            )}
+          </>
         }
       />
 
-      <div className="px-5" style={{ background: C.panel, borderBottom: `1px solid ${C.line}` }}>
-        <div className="flex gap-1 overflow-x-auto">
+      <div className="px-3 sm:px-5" style={{ background: C.panel, borderBottom: `1px solid ${C.line}` }}>
+        <div className="no-scrollbar flex gap-1 overflow-x-auto">
           {NAV.map((n) => (
             <button
               key={n.id}
               onClick={() => setTab(n.id)}
-              className="inline-flex items-center gap-2 whitespace-nowrap px-3.5 py-3 text-sm font-medium"
+              aria-label={n.label}
+              className="desk-nav inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap px-3 py-3 text-sm font-medium transition-colors sm:px-3.5"
               style={{
                 color: tab === n.id ? C.navy : C.slate,
                 borderBottom: `2px solid ${tab === n.id ? C.gold : "transparent"}`,
+                background: tab === n.id ? C.paper : "transparent",
               }}
             >
               <n.icon size={15} />
-              {n.label}
+              <span className="sm:hidden">{n.short}</span>
+              <span className="hidden sm:inline">{n.label}</span>
             </button>
           ))}
         </div>
       </div>
+      </div>
 
-      <div className="mx-auto max-w-7xl space-y-5 p-5">
-        {mode === "demo" && (
+      <div className="mx-auto max-w-7xl space-y-4 p-3 safe-bottom sm:space-y-5 sm:p-5">
+        {tab === "dashboard" && (
+          <BrandHero
+            compact
+            kicker="Home"
+            sub={`${monthLabel} · ${team.length} relationship managers · Kapil Sharma`}
+          />
+        )}
+        {mode === "demo" && tab !== "dashboard" && (
           <div className="flex items-start gap-3 rounded-lg px-4 py-3 text-xs" style={{ background: C.amberBg, color: C.ink }}>
             <AlertTriangle size={14} className="mt-0.5 shrink-0" />
-            Signed in as Maya Kapoor. This preview uses seeded figures so an interviewer can walk the console without a database.
+            Signed in as Kapil Sharma. Use Team to add or remove RMs.
           </div>
         )}
         {team.length === 0 && (
@@ -393,7 +439,7 @@ export default function TLConsole({
         )}
 
         {monthList.length === 0 ? (
-          <div className="rounded-lg p-4" style={{ background: C.panel, border: `1px solid ${C.line}` }}>
+          <div className="desk-card p-4" style={{ background: C.panel }}>
             <div className="mb-1 text-sm font-semibold" style={{ color: C.ink }}>
               Open your first reporting month
             </div>
@@ -404,8 +450,9 @@ export default function TLConsole({
           </div>
         ) : (
           <>
-            {pending.length > 0 ? (
-              <div className="flex items-start gap-3 rounded-lg px-4 py-3" style={{ background: C.panel, border: `1px solid ${C.line}` }}>
+            {tab === "dashboard" &&
+              (pending.length > 0 ? (
+              <div className="flex flex-col items-start gap-3 rounded-lg px-4 py-3 sm:flex-row" style={{ background: C.panel, border: `1px solid ${C.line}` }}>
                 <Clock size={17} style={{ color: C.amber }} className="mt-0.5 shrink-0" />
                 <div className="flex-1">
                   <div className="text-sm font-semibold" style={{ color: C.ink }}>
@@ -415,6 +462,9 @@ export default function TLConsole({
                     Still waiting on {pending.map((r) => r.name).join(", ")}.
                   </div>
                 </div>
+                <GhostButton onClick={() => askAssistant("Who hasn't submitted this month?")} icon={Sparkles}>
+                  Nudge them
+                </GhostButton>
               </div>
             ) : (
               team.length > 0 && (
@@ -425,10 +475,11 @@ export default function TLConsole({
                   </div>
                 </div>
               )
-            )}
+            ))}
 
             {tab === "dashboard" && (
               <>
+                <RiskBoard kpis={kpiRows} monthLabel={monthLabel} onAsk={askAssistant} />
                 <div className="flex flex-wrap gap-3">
                   {anyTargets && (
                     <StatTile
@@ -448,8 +499,8 @@ export default function TLConsole({
                   />
                 </div>
 
-                <div className="overflow-hidden rounded-lg" style={{ border: `1px solid ${C.line}`, background: C.panel }}>
-                  <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: `1px solid ${C.line}` }}>
+                <div className="desk-card overflow-hidden">
+                  <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3" style={{ borderBottom: `1px solid ${C.line}` }}>
                     <div>
                       <div className="text-sm font-semibold" style={{ color: C.ink }}>
                         Leaderboard
@@ -462,7 +513,7 @@ export default function TLConsole({
                       Export CSV
                     </GhostButton>
                   </div>
-                  <div className="overflow-x-auto">
+                  <TableScroll>
                     <table className="w-full text-sm">
                       <thead>
                         <tr style={{ background: C.navy }}>
@@ -481,7 +532,7 @@ export default function TLConsole({
                       </thead>
                       <tbody>
                         {rows.map((r, i) => (
-                          <tr key={r.id} style={{ background: i % 2 ? C.paper : C.panel, borderBottom: `1px solid ${C.lineSoft}` }}>
+                          <tr key={r.id} className="desk-row" style={{ background: i % 2 ? C.paper : C.panel, borderBottom: `1px solid ${C.lineSoft}` }}>
                             <td className="px-3 py-2 text-center tabular-nums" style={{ color: C.slate }}>
                               {r.rank}
                             </td>
@@ -498,14 +549,26 @@ export default function TLConsole({
                                 >
                                   {initials(r.name)}
                                 </span>
-                                <span className="whitespace-nowrap font-medium" style={{ color: C.ink }}>
-                                  {r.name}
-                                </span>
-                                {!r.submitted && (
-                                  <span className="shrink-0 rounded px-1.5 py-0.5 text-xs" style={{ background: C.amberBg, color: C.amber }}>
-                                    pending
-                                  </span>
-                                )}
+                                <div className="min-w-0">
+                                  <div className="whitespace-nowrap font-medium" style={{ color: C.ink }}>
+                                    {r.name}
+                                  </div>
+                                  <div className="mt-0.5 flex flex-wrap gap-1">
+                                    {!r.submitted && (
+                                      <span className="rounded px-1.5 py-0.5 text-[10px]" style={{ background: C.amberBg, color: C.amber }}>
+                                        pending
+                                      </span>
+                                    )}
+                                    {(flagMap.get(r.id) ?? [])
+                                      .filter((f) => f !== "pending_submission" && f !== "behind_target")
+                                      .slice(0, 2)
+                                      .map((f) => (
+                                        <span key={f} className="rounded px-1.5 py-0.5 text-[10px]" style={{ background: C.redBg, color: C.red }}>
+                                          {riskLabel(f)}
+                                        </span>
+                                      ))}
+                                  </div>
+                                </div>
                               </div>
                             </td>
                             <td className="px-3 py-2 text-right font-medium tabular-nums">{fmtLakh(r.ape)}</td>
@@ -545,14 +608,32 @@ export default function TLConsole({
                         ))}
                       </tbody>
                     </table>
-                  </div>
+                  </TableScroll>
                 </div>
               </>
             )}
 
+            {tab === "team" && (
+              <TeamDesk
+                team={team}
+                onAdded={(rm) => {
+                  setTeam((list) => (list.some((r) => r.id === rm.id) ? list.map((r) => (r.id === rm.id ? rm : r)) : [...list, rm]));
+                  setStatus(`Added ${rm.full_name}`);
+                }}
+                onRemoved={(id) => {
+                  setTeam((list) => list.filter((r) => r.id !== id));
+                  setStatus("RM removed");
+                }}
+              />
+            )}
+
+            {tab === "assistant" && (
+              <AssistantDesk monthId={activeMonth} monthLabel={monthLabel} initialQuery={ask} />
+            )}
+
             {tab === "entry" && (
               <div className="space-y-4">
-                <div className="flex flex-wrap items-end gap-4 rounded-lg p-4" style={{ background: C.panel, border: `1px solid ${C.line}` }}>
+                <div className="desk-card flex flex-wrap items-end gap-4 p-4">
                   <MonthOpener onOpen={openMonth} />
                   <div>
                     <div className="mb-1.5 text-xs" style={{ color: C.slate }}>
@@ -573,7 +654,7 @@ export default function TLConsole({
                   </div>
                 </div>
 
-                <div className="overflow-hidden rounded-lg" style={{ border: `1px solid ${C.line}`, background: C.panel }}>
+                <div className="desk-card overflow-hidden">
                   <div className="px-4 py-3" style={{ borderBottom: `1px solid ${C.line}` }}>
                     <div className="text-sm font-semibold" style={{ color: C.ink }}>
                       {monthLabel}
@@ -583,7 +664,7 @@ export default function TLConsole({
                       You set targets and quality scores. APE, FRP and policies come from each RM — edit only to correct a submission.
                     </div>
                   </div>
-                  <div className="overflow-x-auto">
+                  <TableScroll>
                     <table className="w-full text-sm" style={{ minWidth: 900 }}>
                       <thead>
                         <tr style={{ background: C.navy }}>
@@ -601,7 +682,7 @@ export default function TLConsole({
                           const a = assigns[rowKey(r.id, activeMonth)];
                           const ach = num(a?.target) ? (num(s?.ape) / num(a?.target)) * 100 : null;
                           return (
-                            <tr key={r.id} style={{ background: i % 2 ? C.paper : C.panel, borderBottom: `1px solid ${C.lineSoft}` }}>
+                            <tr key={r.id} className="desk-row" style={{ background: i % 2 ? C.paper : C.panel, borderBottom: `1px solid ${C.lineSoft}` }}>
                               <td className="whitespace-nowrap px-3 py-1.5">
                                 <span className="font-medium" style={{ color: C.ink }}>
                                   {r.full_name}
@@ -631,13 +712,13 @@ export default function TLConsole({
                         })}
                       </tbody>
                     </table>
-                  </div>
+                  </TableScroll>
                 </div>
               </div>
             )}
 
             {tab === "certs" && (
-              <div className="overflow-hidden rounded-lg" style={{ border: `1px solid ${C.line}`, background: C.panel }}>
+              <div className="desk-card overflow-hidden">
                 <div className="px-4 py-3" style={{ borderBottom: `1px solid ${C.line}` }}>
                   <div className="text-sm font-semibold" style={{ color: C.ink }}>
                     Certification scores
@@ -646,7 +727,7 @@ export default function TLConsole({
                     RMs keep these current themselves. Below 70 is flagged.
                   </div>
                 </div>
-                <div className="overflow-x-auto">
+                <TableScroll>
                   <table className="w-full text-sm">
                     <thead>
                       <tr style={{ background: C.navy }}>
@@ -671,7 +752,7 @@ export default function TLConsole({
                           </td>
                         );
                         return (
-                          <tr key={r.id} style={{ background: i % 2 ? C.paper : C.panel, borderBottom: `1px solid ${C.lineSoft}` }}>
+                          <tr key={r.id} className="desk-row" style={{ background: i % 2 ? C.paper : C.panel, borderBottom: `1px solid ${C.lineSoft}` }}>
                             <td className="whitespace-nowrap px-3 py-2 font-medium" style={{ color: C.ink }}>
                               {r.full_name}
                             </td>
@@ -686,7 +767,7 @@ export default function TLConsole({
                       })}
                     </tbody>
                   </table>
-                </div>
+                </TableScroll>
               </div>
             )}
 
@@ -696,7 +777,7 @@ export default function TLConsole({
                   Coaching notes are team-lead only. Row-level security blocks RMs even if they guess the table name.
                 </p>
                 {team.map((r) => (
-                  <div key={r.id} className="rounded-lg p-4" style={{ background: C.panel, border: `1px solid ${C.line}` }}>
+                  <div key={r.id} className="desk-card desk-card-hover p-4">
                     <div className="mb-2 text-sm font-medium" style={{ color: C.ink }}>
                       {r.full_name}
                     </div>

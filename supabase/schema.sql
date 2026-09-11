@@ -60,6 +60,24 @@ create table if not exists public.coaching_notes (
   updated_at timestamptz not null default now()
 );
 
+-- In-app notices: TL writes, RM reads/acknowledges own rows only.
+create table if not exists public.notifications (
+  id          uuid primary key default gen_random_uuid(),
+  rm_id       uuid not null references public.profiles(id) on delete cascade,
+  rm_name     text not null default '',
+  from_id     uuid not null references public.profiles(id) on delete cascade,
+  from_name   text not null,
+  title       text not null,
+  body        text not null,
+  query       text not null default '',
+  reason      text not null default '',
+  priority    text not null default 'normal' check (priority in ('normal','high')),
+  month_id    text not null,
+  created_at  timestamptz not null default now(),
+  read_at     timestamptz,
+  ack_at      timestamptz
+);
+
 -- ---------- helper ----------
 -- SECURITY DEFINER so the policy on profiles doesn't recurse into itself.
 create or replace function public.is_tl()
@@ -106,6 +124,7 @@ alter table public.assignments    enable row level security;
 alter table public.submissions    enable row level security;
 alter table public.certifications enable row level security;
 alter table public.coaching_notes enable row level security;
+alter table public.notifications  enable row level security;
 
 -- ---------- profiles ----------
 drop policy if exists profiles_select on public.profiles;
@@ -184,7 +203,33 @@ create policy notes_tl_only on public.coaching_notes
   for all to authenticated
   using (public.is_tl()) with check (public.is_tl());
 
+-- ---------- notifications: RM reads/acks own, TL inserts and reads all ----------
+drop policy if exists notices_select on public.notifications;
+create policy notices_select on public.notifications
+  for select to authenticated
+  using (rm_id = auth.uid() or public.is_tl());
+
+drop policy if exists notices_tl_insert on public.notifications;
+create policy notices_tl_insert on public.notifications
+  for insert to authenticated
+  with check (public.is_tl());
+
+drop policy if exists notices_rm_ack on public.notifications;
+create policy notices_rm_ack on public.notifications
+  for update to authenticated
+  using (rm_id = auth.uid())
+  with check (rm_id = auth.uid());
+
 -- ---------- indexes ----------
 create index if not exists idx_submissions_month on public.submissions(month_id);
 create index if not exists idx_assignments_month on public.assignments(month_id);
 create index if not exists idx_profiles_role on public.profiles(role) where active;
+create index if not exists idx_notifications_rm on public.notifications(rm_id, created_at desc);
+
+-- TL-provisioned RMs may not have an auth.users row yet.
+do $$ begin
+  alter table public.profiles drop constraint if exists profiles_id_fkey;
+exception when undefined_object then
+  null;
+end $$;
+alter table public.profiles alter column id set default gen_random_uuid();

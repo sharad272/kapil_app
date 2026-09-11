@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Geist, Geist_Mono, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -12,19 +12,41 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const sourceSerif = Source_Serif_4({
+  variable: "--font-serif",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://kapilapp.vercel.app"),
   title: {
-    default: "RM Productivity Portal",
-    template: "%s · RM Portal",
+    default: "Team Victory — Cross Sell",
+    template: "%s · Team Victory",
   },
-  description:
-    "Monthly APE, FRP, quality and certification tracking for relationship managers. RMs submit their own figures; the team lead sees everyone's.",
+  description: "Team Victory Cross Sell desk — APE, FRP, quality and certifications for relationship managers.",
+  applicationName: "Team Victory",
+  appleWebApp: {
+    capable: true,
+    title: "Team Victory",
+    statusBarStyle: "black-translucent",
+  },
+  formatDetection: {
+    telephone: false,
+    email: false,
+    address: false,
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#1E2761",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${sourceSerif.variable} h-full antialiased`}>
       <body className="min-h-full">{children}</body>
     </html>
   );

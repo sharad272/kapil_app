@@ -9,8 +9,8 @@ import type {
 
 export const DEMO_TL: Profile = {
   id: "demo-tl",
-  email: "maya.kapoor@atlaslife.in",
-  full_name: "Maya Kapoor",
+  email: "kapil.sharma@atlaslife.in",
+  full_name: "Kapil Sharma",
   role: "tl",
   active: true,
 };
@@ -58,7 +58,7 @@ export const DEMO_SUBMISSIONS: Submission[] = DEMO_RMS.flatMap((rm) =>
       rm_id: rm.id,
       month_id: month.id,
       ape: value,
-      frp: Math.round(value * 0.92),
+      frp: Math.round(value * (rm.id === "demo-kabir" && month.id === "2026-09" ? 0.78 : 0.92)),
       policies: 8 + i + DEMO_RMS.indexOf(rm),
       submitted_at: closed || rm.id !== "demo-kabir" ? "2026-09-08T11:20:00.000Z" : null,
     };
