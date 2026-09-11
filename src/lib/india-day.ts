@@ -6,6 +6,8 @@ const ZENITH = 90.833;
 const RAD = Math.PI / 180;
 
 export type IndiaTheme = "day" | "night";
+export type ThemePref = "auto" | "day" | "night";
+export const THEME_PREF_KEY = "tv-theme";
 
 export function indiaParts(at: Date = new Date()) {
   const bag: Record<string, string> = {};
@@ -91,13 +93,40 @@ export function msUntilIndiaThemeFlip(at: Date = new Date()) {
   return Math.max(5_000, (next - now) * 60_000 + 400);
 }
 
+export function readThemePref(): ThemePref {
+  try {
+    const v = localStorage.getItem(THEME_PREF_KEY);
+    if (v === "auto" || v === "day" || v === "night") return v;
+  } catch {
+    /* private mode */
+  }
+  return "auto";
+}
+
+export function resolvedTheme(pref: ThemePref = readThemePref(), at: Date = new Date()): IndiaTheme {
+  if (pref === "day" || pref === "night") return pref;
+  return indiaThemeAt(at);
+}
+
 export function applyIndiaTheme(root: HTMLElement = document.documentElement) {
-  const night = isNightInIndia();
+  const pref = readThemePref();
+  const night = resolvedTheme(pref) === "night";
   root.dataset.theme = night ? "night" : "day";
+  root.dataset.themePref = pref;
   root.style.colorScheme = night ? "dark" : "light";
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute("content", night ? "#070A16" : "#1E2761");
 }
 
-/** Blocking boot — keep in sync with indiaSunMinutes (New Delhi, IST). */
-export const INDIA_THEME_BOOT = `(function(){try{var LAT=28.6139,LNG=77.209,Z=90.833,R=Math.PI/180;function P(d){var o={};new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Kolkata",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"}).formatToParts(d).forEach(function(p){if(p.type!=="literal")o[p.type]=p.value});return{y:+o.year,m:+o.month,d:+o.day,h:+o.hour,min:+o.minute,s:+o.second}}function D(y,m,d){return Math.floor((Date.UTC(y,m-1,d)-Date.UTC(y,0,0))/864e5)}function U(y,m,d,up){var N=D(y,m,d),lh=LNG/15,t=N+((up?6:18)-lh)/24,M=0.9856*t-3.289,L=M+1.916*Math.sin(M*R)+0.02*Math.sin(2*M*R)+282.634;L=(L%360+360)%360;var RA=Math.atan(0.91764*Math.tan(L*R))/R;RA=(RA%360+360)%360;RA+=Math.floor(L/90)*90-Math.floor(RA/90)*90;RA/=15;var sd=0.39782*Math.sin(L*R),cd=Math.cos(Math.asin(sd)),ch=(Math.cos(Z*R)-(sd*Math.sin(LAT*R)))/(cd*Math.cos(LAT*R));if(ch>1||ch<-1)return(up?6:18)*60;var H=(up?360-Math.acos(ch)/R:Math.acos(ch)/R)/15,T=H+RA-0.06571*t-6.622,UT=T-lh;UT=(UT%24+24)%24;return UT*60}var p=P(new Date()),rise=((U(p.y,p.m,p.d,true)+330)%1440+1440)%1440,set=((U(p.y,p.m,p.d,false)+330)%1440+1440)%1440,now=p.h*60+p.min+p.s/60,n=now<rise||now>=set,r=document.documentElement;r.setAttribute("data-theme",n?"night":"day");r.style.colorScheme=n?"dark":"light"}catch(e){}})();`;
+export function setThemePref(pref: ThemePref) {
+  try {
+    localStorage.setItem(THEME_PREF_KEY, pref);
+  } catch {
+    /* still apply for this tab */
+  }
+  applyIndiaTheme();
+  window.dispatchEvent(new Event("tv-theme"));
+}
+
+/** Blocking boot — keep in sync with indiaSunMinutes (New Delhi, IST) + localStorage tv-theme. */
+export const INDIA_THEME_BOOT = `(function(){try{var LAT=28.6139,LNG=77.209,Z=90.833,R=Math.PI/180;function P(d){var o={};new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Kolkata",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"}).formatToParts(d).forEach(function(p){if(p.type!=="literal")o[p.type]=p.value});return{y:+o.year,m:+o.month,d:+o.day,h:+o.hour,min:+o.minute,s:+o.second}}function D(y,m,d){return Math.floor((Date.UTC(y,m-1,d)-Date.UTC(y,0,0))/864e5)}function U(y,m,d,up){var N=D(y,m,d),lh=LNG/15,t=N+((up?6:18)-lh)/24,M=0.9856*t-3.289,L=M+1.916*Math.sin(M*R)+0.02*Math.sin(2*M*R)+282.634;L=(L%360+360)%360;var RA=Math.atan(0.91764*Math.tan(L*R))/R;RA=(RA%360+360)%360;RA+=Math.floor(L/90)*90-Math.floor(RA/90)*90;RA/=15;var sd=0.39782*Math.sin(L*R),cd=Math.cos(Math.asin(sd)),ch=(Math.cos(Z*R)-(sd*Math.sin(LAT*R)))/(cd*Math.cos(LAT*R));if(ch>1||ch<-1)return(up?6:18)*60;var H=(up?360-Math.acos(ch)/R:Math.acos(ch)/R)/15,T=H+RA-0.06571*t-6.622,UT=T-lh;UT=(UT%24+24)%24;return UT*60}var pref="";try{pref=localStorage.getItem("tv-theme")||""}catch(e){}var n;if(pref==="night")n=true;else if(pref==="day")n=false;else{var p=P(new Date()),rise=((U(p.y,p.m,p.d,true)+330)%1440+1440)%1440,set=((U(p.y,p.m,p.d,false)+330)%1440+1440)%1440,now=p.h*60+p.min+p.s/60;n=now<rise||now>=set}var r=document.documentElement;r.setAttribute("data-theme",n?"night":"day");r.setAttribute("data-theme-pref",pref==="day"||pref==="night"?pref:"auto");r.style.colorScheme=n?"dark":"light"}catch(e){}})();`;

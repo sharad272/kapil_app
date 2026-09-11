@@ -4,6 +4,7 @@ import { hasSupabase, C } from "@/lib/theme";
 import { DEMO_RMS, DEMO_TL } from "@/lib/demo-data";
 import { DemoEntry } from "@/components/demo-entry";
 import { BrandHero } from "@/components/brand-hero";
+import { ThemeToggle } from "@/components/india-theme";
 
 const POINTS = [
   {
@@ -38,14 +39,17 @@ export async function Landing() {
               Cross Sell
             </p>
           </div>
-          <Link
-            href="/how-it-works"
-            prefetch={false}
-            className="desk-btn min-h-11 inline-flex items-center rounded-lg px-3 text-xs"
-            style={{ color: C.ice, border: `1px solid ${C.navyMid}` }}
-          >
-            How access works
-          </Link>
+          <div className="flex shrink-0 items-center gap-2">
+            <ThemeToggle />
+            <Link
+              href="/how-it-works"
+              prefetch={false}
+              className="desk-btn min-h-11 inline-flex items-center rounded-lg px-3 text-xs"
+              style={{ color: C.ice, border: `1px solid ${C.navyMid}` }}
+            >
+              How access works
+            </Link>
+          </div>
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">

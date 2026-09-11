@@ -3,6 +3,7 @@
 import React from "react";
 import type { LucideIcon } from "lucide-react";
 import { ChevronLeft } from "lucide-react";
+import { ThemeToggle } from "@/components/india-theme";
 import { C } from "@/lib/theme";
 import { initials } from "@/lib/format";
 
@@ -259,6 +260,7 @@ export function TopBar({
             </span>
           ) : null}
           {right}
+          <ThemeToggle />
           <button
             onClick={onSignOut}
             className="desk-btn min-h-11 rounded-lg px-3 py-1.5 text-xs font-medium"

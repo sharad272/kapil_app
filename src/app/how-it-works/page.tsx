@@ -2,6 +2,7 @@ import { cacheLife } from "next/cache";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { C } from "@/lib/theme";
+import { ThemeToggle } from "@/components/india-theme";
 
 export const metadata: Metadata = {
   title: "How access works",
@@ -19,14 +20,17 @@ export default async function HowItWorksPage() {
           <Link href="/" prefetch={false} className="serif min-h-11 inline-flex items-center text-sm font-semibold" style={{ color: C.onNavy }}>
             Team Victory
           </Link>
-          <Link
-            href="/login"
-            prefetch={false}
-            className="desk-btn min-h-11 inline-flex items-center rounded-lg px-3 text-xs"
-            style={{ color: C.ice, border: `1px solid ${C.navyMid}` }}
-          >
-            Sign in
-          </Link>
+          <div className="flex shrink-0 items-center gap-2">
+            <ThemeToggle />
+            <Link
+              href="/login"
+              prefetch={false}
+              className="desk-btn min-h-11 inline-flex items-center rounded-lg px-3 text-xs"
+              style={{ color: C.ice, border: `1px solid ${C.navyMid}` }}
+            >
+              Sign in
+            </Link>
+          </div>
         </div>
       </header>
       <article className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14">

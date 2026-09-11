@@ -6,6 +6,7 @@ import { Check, Mail, ShieldAlert } from "lucide-react";
 import { C, PrimaryButton } from "@/components/ui";
 import { createClient } from "@/lib/supabase/client";
 import { DemoEntry, type DeskPick } from "@/components/demo-entry";
+import { ThemeToggle } from "@/components/india-theme";
 
 export default function LoginForm({
   supabaseEnabled,
@@ -67,6 +68,9 @@ export default function LoginForm({
         style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }}
       >
         <div className="w-full max-w-lg">
+          <div className="mb-4 flex justify-end">
+            <ThemeToggle tone="onPaper" />
+          </div>
           <div className="mb-6 lg:hidden">
             <p className="text-[11px] uppercase tracking-[0.28em]" style={{ color: C.gold }}>
               Production desk
