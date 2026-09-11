@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { AlertTriangle, Check, Clock, Send } from "lucide-react";
@@ -10,6 +10,7 @@ import { C, EmptyState, NumInput, PrimaryButton, StatTile, TopBar } from "@/comp
 import { achievementColor, fmtLakh, num, parseLoose, whenText } from "@/lib/format";
 import { hasSupabase } from "@/lib/theme";
 import { leaveDesk } from "@/lib/enter-desk";
+import { DEMO_BOOK_KEY, loadDemoBook, writeDemoBook } from "@/lib/demo-book";
 import { createClient } from "@/lib/supabase/client";
 import type { AppMode, Assignment, Certification, MonthRow, Profile, Submission } from "@/lib/types";
 
@@ -47,16 +48,55 @@ export default function RMWorkspace({
   const [certs, setCerts] = useState<Certification>(
     initialCerts ?? { rm_id: profile.id, ulip: null, endowment: null, term: null },
   );
+  const [monthList, setMonthList] = useState(months);
+  const [assignRows, setAssignRows] = useState(assignments);
   const [activeMonth, setActiveMonth] = useState(months.length ? months[months.length - 1].id : "");
   const [status, setStatus] = useState("");
+  const [ready, setReady] = useState(mode !== "demo");
 
   const assignMap = useMemo(() => {
     const map: Record<string, Assignment> = {};
-    assignments.forEach((a) => {
+    assignRows.forEach((a) => {
       map[a.month_id] = a;
     });
     return map;
-  }, [assignments]);
+  }, [assignRows]);
+
+  useEffect(() => {
+    if (mode !== "demo") return;
+    const apply = () => {
+      const book = loadDemoBook();
+      const mine = book.submissions.filter((s) => s.rm_id === profile.id);
+      const map: Record<string, Submission> = {};
+      mine.forEach((s) => {
+        map[s.month_id] = s;
+      });
+      setSubs(map);
+      setMonthList(book.months);
+      setAssignRows(book.assignments.filter((a) => a.rm_id === profile.id));
+      const cert = book.certs.find((c) => c.rm_id === profile.id);
+      if (cert) setCerts(cert);
+      if (book.months.length) setActiveMonth(book.months[book.months.length - 1].id);
+    };
+    apply();
+    setReady(true);
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === DEMO_BOOK_KEY) apply();
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [mode, profile.id]);
+
+  useEffect(() => {
+    if (mode !== "demo" || !ready) return;
+    const book = loadDemoBook();
+    writeDemoBook({
+      ...book,
+      submissions: [...book.submissions.filter((s) => s.rm_id !== profile.id), ...Object.values(subs)],
+      assignments: [...book.assignments.filter((a) => a.rm_id !== profile.id), ...assignRows],
+      certs: [...book.certs.filter((c) => c.rm_id !== profile.id), certs],
+    });
+  }, [mode, ready, subs, assignRows, certs, profile.id]);
 
   async function signOut() {
     if (mode === "live" && hasSupabase()) {
@@ -77,7 +117,10 @@ export default function RMWorkspace({
   }
 
   async function persistSubmission(next: Submission) {
-    if (mode === "demo") return;
+    if (mode === "demo") {
+      setStatus("Saved");
+      return;
+    }
     const supabase = createClient();
     const { error } = await supabase.from("submissions").upsert({
       rm_id: profile.id,
@@ -91,7 +134,7 @@ export default function RMWorkspace({
     setStatus(error ? "Save failed" : "Saved");
   }
 
-  if (months.length === 0) {
+  if (monthList.length === 0) {
     return (
       <div>
         <TopBar
@@ -125,7 +168,7 @@ export default function RMWorkspace({
   const quality = assign?.quality_score ?? null;
   const achievement = target ? (num(cur.ape) / num(target)) * 100 : null;
   const remaining = target ? num(target) - num(cur.ape) : null;
-  const closed = months.find((m) => m.id === activeMonth)?.is_open === false;
+  const closed = monthList.find((m) => m.id === activeMonth)?.is_open === false;
   const weakCerts = (
     [
       { label: "ULIP", v: certs.ulip },
@@ -175,7 +218,7 @@ export default function RMWorkspace({
     }
   }
 
-  const chartData = months.map((m) => {
+  const chartData = monthList.map((m) => {
     const s = subs[m.id];
     const a = assignMap[m.id];
     return {
@@ -205,7 +248,7 @@ export default function RMWorkspace({
               className="desk-btn min-h-11 rounded-lg px-3 py-1.5 text-sm font-medium text-white outline-none"
               style={{ background: C.navyDeep, border: `1px solid ${C.navyMid}` }}
             >
-              {months.map((m) => (
+              {monthList.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.label}
                   {m.is_open ? "" : " · closed"}
@@ -219,12 +262,12 @@ export default function RMWorkspace({
         <BrandHero
           compact
           kicker="Home"
-          sub={`${months.find((m) => m.id === activeMonth)?.label ?? "Your desk"} · ${profile.full_name}`}
+          sub={`${monthList.find((m) => m.id === activeMonth)?.label ?? "Your desk"} · ${profile.full_name}`}
         />
         <Inbox rmId={profile.id} />
         {mode === "demo" && (
           <div className="rounded-lg px-4 py-3 text-xs" style={{ background: C.amberBg, color: C.ink }}>
-            Preview as {profile.full_name}. Writes stay on this device until Supabase is connected.
+            Figures, submits and scores stay on this browser. Close the tab and open it again — your last save is still here.
           </div>
         )}
         {closed && (

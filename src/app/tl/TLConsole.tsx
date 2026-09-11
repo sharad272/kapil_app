@@ -33,6 +33,7 @@ import {
   pctChange,
 } from "@/lib/format";
 import { hasSupabase } from "@/lib/theme";
+import { DEMO_BOOK_KEY, activeRms, loadDemoBook, writeDemoBook } from "@/lib/demo-book";
 import { leaveDesk, requestBack } from "@/lib/enter-desk";
 import { createClient } from "@/lib/supabase/client";
 import type {
@@ -100,13 +101,14 @@ export default function TLConsole({
     });
     return map;
   });
-  const certMap = useMemo(() => {
+  const [certMap, setCertMap] = useState<Record<string, Certification>>(() => {
     const map: Record<string, Certification> = {};
     initialCerts.forEach((c) => {
       map[c.rm_id] = c;
     });
     return map;
-  }, [initialCerts]);
+  });
+  const [ready, setReady] = useState(mode !== "demo");
 
   const monthLabel = monthList.find((m) => m.id === activeMonth)?.label ?? "";
   const monthIdx = monthList.findIndex((m) => m.id === activeMonth);
@@ -160,6 +162,58 @@ export default function TLConsole({
       window.removeEventListener("desk:back", onBack);
     };
   }, []);
+
+  useEffect(() => {
+    if (mode !== "demo") return;
+    const apply = () => {
+      const book = loadDemoBook();
+      setTeam(activeRms(book));
+      setMonthList(book.months);
+      const nextSubs: Record<string, Submission> = {};
+      book.submissions.forEach((s) => {
+        nextSubs[rowKey(s.rm_id, s.month_id)] = s;
+      });
+      setSubs(nextSubs);
+      const nextAssigns: Record<string, Assignment> = {};
+      book.assignments.forEach((a) => {
+        nextAssigns[rowKey(a.rm_id, a.month_id)] = a;
+      });
+      setAssigns(nextAssigns);
+      const nextCerts: Record<string, Certification> = {};
+      book.certs.forEach((c) => {
+        nextCerts[c.rm_id] = c;
+      });
+      setCertMap(nextCerts);
+      const nextNotes: Record<string, string> = {};
+      book.notes.forEach((n) => {
+        nextNotes[n.rm_id] = n.note;
+      });
+      setNotes(nextNotes);
+      if (book.months.length) setActiveMonth(book.months[book.months.length - 1].id);
+    };
+    apply();
+    setReady(true);
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === DEMO_BOOK_KEY) apply();
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [mode]);
+
+  useEffect(() => {
+    if (mode !== "demo" || !ready) return;
+    writeDemoBook({
+      v: 1,
+      team,
+      months: monthList,
+      submissions: Object.values(subs),
+      assignments: Object.values(assigns),
+      certs: Object.values(certMap),
+      notes: Object.entries(notes)
+        .filter(([, note]) => note.trim())
+        .map(([rm_id, note]) => ({ rm_id, note })),
+    });
+  }, [mode, ready, team, monthList, subs, assigns, certMap, notes]);
 
   function later(id: string, work: () => Promise<void>) {
     if (timers.current[id]) clearTimeout(timers.current[id]);
@@ -469,7 +523,7 @@ export default function TLConsole({
         {mode === "demo" && tab !== "dashboard" && (
           <div className="flex items-start gap-3 rounded-lg px-4 py-3 text-xs" style={{ background: C.amberBg, color: C.ink }}>
             <AlertTriangle size={14} className="mt-0.5 shrink-0" />
-            Signed in as Kapil Sharma. Use Team to add or remove RMs.
+            Signed in as Kapil Sharma. Edits stay on this browser after you close the tab. Use Team to add or remove RMs.
           </div>
         )}
         {team.length === 0 && (

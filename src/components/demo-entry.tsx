@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChevronRight, Search, Shield } from "lucide-react";
 import { Avatar, C } from "@/components/ui";
 import { enterDesk, hardOpen } from "@/lib/enter-desk";
+import { activeRms, readDemoBook } from "@/lib/demo-book";
 
 export type DeskPick = { id: string; full_name: string; email: string };
 
@@ -21,18 +22,23 @@ export function DemoEntry({
 }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [q, setQ] = useState("");
+  const [roster, setRoster] = useState(rms);
 
   useEffect(() => {
     const reset = () => setBusy(null);
     window.addEventListener("pageshow", reset);
+    const book = readDemoBook();
+    if (book) {
+      setRoster(activeRms(book).map((rm) => ({ id: rm.id, full_name: rm.full_name, email: rm.email })));
+    }
     return () => window.removeEventListener("pageshow", reset);
   }, []);
 
   const filtered = useMemo(() => {
     const n = q.trim().toLowerCase();
-    if (!n) return rms;
-    return rms.filter((rm) => `${rm.full_name} ${rm.email}`.toLowerCase().includes(n));
-  }, [rms, q]);
+    if (!n) return roster;
+    return roster.filter((rm) => `${rm.full_name} ${rm.email}`.toLowerCase().includes(n));
+  }, [roster, q]);
 
   async function enter(id: string, href: "/tl" | "/rm") {
     setBusy(id);
@@ -75,7 +81,7 @@ export function DemoEntry({
         <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.18em]" style={{ color: C.slateLight }}>
           Relationship managers
         </p>
-        {rms.length === 0 ? (
+        {roster.length === 0 ? (
           <p className="text-xs leading-5" style={{ color: C.slate }}>
             No RMs on the book yet. Sign in as {teamLead.full_name} and add people from Team.
           </p>
